@@ -1,0 +1,9 @@
+node_modules/
+package-lock.json
+build/
+*.dmg
+.DS_Store
+*.zip
+/tmp/
+app_debug*.html
+test_*.js

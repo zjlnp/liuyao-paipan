@@ -311,7 +311,7 @@ function renderGuaCard(prefix, gua, changingYaos, isBian, zhuanggua) {
     if (zgInfo) {
       var zgSpan = document.createElement('span');
       zgSpan.className = 'yao-zg-sub';
-      zgSpan.textContent = zgInfo.liushou + ' ' + zgInfo.nazhi + zgInfo.liuqin;
+      zgSpan.textContent = zgInfo.liushou + ' ' + zgInfo.liuqin + zgInfo.nazhi + zgInfo.wuxing;
       zgSpan.style.color = window.ZhuangGua ? window.ZhuangGua.getLiuqinColor(zgInfo.liuqin) : '#5a5550';
       right.appendChild(zgSpan);
       // 伏神：本宫卦中缺失的六亲，红色 ↑ 标记

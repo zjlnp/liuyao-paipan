@@ -1731,11 +1731,15 @@ function clearAll() {
 function setupInputs() {
   const inputs = [];
   for (let i=1;i<=6;i++) inputs.push(document.getElementById('yao'+i));
+  let processingKey = false;
   inputs.forEach((inp, idx) => {
     inp.addEventListener('keydown', e => {
+      if (processingKey) return;
       if (['Backspace','Delete','Tab','ArrowLeft','ArrowRight','Escape'].includes(e.key)) return;
       if (/^[6-9]$/.test(e.key)) {
         e.preventDefault(); inp.value = e.key; inp.classList.add('filled'); inp.classList.remove('invalid');
+        processingKey = true;
+        setTimeout(() => { processingKey = false; }, 50);
         if (idx<5) { inputs[idx+1].focus(); inputs[idx+1].select(); }
         return;
       }

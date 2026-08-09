@@ -1687,7 +1687,7 @@ function formatGanZhi(gz){
     }
   };
 })();
-// ===== 第二代金钱卦 v1.7 =====
+// ===== 第二代金钱卦 v1.8 =====
 
 const YAO_VAL_LABEL = { 6:'六（老阴→阳）', 7:'七（少阳）', 8:'八（少阴）', 9:'九（老阳→阴）' };
 const COMMENTATOR = { wangbi:'王弼·孔颖达', zhuxi:'朱熹', chengyi:'程颐', shaoyong:'邵雍', duanyitianji:'断易天机' };
@@ -1737,14 +1737,18 @@ function setupInputs() {
       if (processingKey) return;
       if (['Backspace','Delete','Tab','ArrowLeft','ArrowRight','Escape'].includes(e.key)) return;
       if (/^[6-9]$/.test(e.key)) {
-        e.preventDefault(); inp.value = e.key; inp.classList.add('filled'); inp.classList.remove('invalid');
+        e.preventDefault(); e.stopImmediatePropagation();
+        inp.value = e.key; inp.classList.add('filled'); inp.classList.remove('invalid');
         processingKey = true;
-        setTimeout(() => { processingKey = false; }, 50);
+        setTimeout(() => { processingKey = false; }, 200);
         if (idx<5) { inputs[idx+1].focus(); inputs[idx+1].select(); }
         return;
       }
       e.preventDefault(); inp.classList.add('invalid');
       setTimeout(() => inp.classList.remove('invalid'), 300);
+    });
+    inp.addEventListener('beforeinput', e => {
+      if (processingKey) { e.preventDefault(); e.stopImmediatePropagation(); }
     });
     inp.addEventListener('paste', e => {
       e.preventDefault();

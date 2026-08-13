@@ -296,11 +296,11 @@ function getYaoNameLocal(isYang, pos) {
  */
 function getLiuqinColor(liuqin) {
   const colors = {
-    '父母': '#4a90d9',  // 蓝
-    '兄弟': '#e8873a',  // 橙
-    '官鬼': '#c44536',  // 红
-    '妻财': '#4a9e6e',  // 绿
-    '子孙': '#8b5cf6',  // 紫
+    '父母': '#3b82c4',  // 蓝
+    '兄弟': '#d0772f',  // 橙
+    '官鬼': '#c0392b',  // 红
+    '妻财': '#4c8a5c',  // 绿
+    '子孙': '#7c5cd6',  // 紫
   };
   return colors[liuqin] || '#999';
 }

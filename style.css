@@ -503,7 +503,8 @@ body {
   position: fixed; top: 0; right: 0; width: 360px; height: 100vh; height: 100dvh;
   background: var(--card-bg); box-shadow: -4px 0 24px rgba(0,0,0,0.1);
   z-index: 100; display: flex; flex-direction: column;
-  padding: 16px; overflow-y: auto;
+  padding: calc(16px + var(--safe-top)) 16px calc(16px + var(--safe-bottom));
+  overflow-y: auto;
 }
 .history-header { display: flex; align-items: center; gap: 10px; margin-bottom: 12px; }
 .history-header h2 { flex: 1; font-size: 18px; font-weight: 700; }
@@ -743,7 +744,7 @@ body {
   #app.has-results .zhi-gua-row { margin-bottom: 0; }
 
   /* History full screen */
-  .history-panel { width: 100vw; width: 100dvw; padding: 12px; }
+  .history-panel { left: 0; right: 0; width: auto; padding: calc(12px + var(--safe-top)) 12px calc(12px + var(--safe-bottom)); }
   .history-header h2 { font-size: 16px; }
   .history-item { padding: 8px 10px; }
   .history-item .hi-title { font-size: 13px; }

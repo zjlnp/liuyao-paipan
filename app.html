@@ -12,7 +12,7 @@
 <link rel="apple-touch-icon" sizes="180x180" href="icons/icon-180.png">
 <link rel="apple-touch-icon" sizes="192x192" href="icons/icon-192.png">
 <link rel="icon" type="image/svg+xml" href="icons/icon.svg">
-<title>六爻排盘 v4.6.3</title>
+<title>六爻排盘 v4.6.4</title>
 <style>
 /* ===== 金钱卦 PWA v2.0 — 移动端适配 ===== */
 :root {
@@ -519,7 +519,8 @@ body {
   position: fixed; top: 0; right: 0; width: 360px; height: 100vh; height: 100dvh;
   background: var(--card-bg); box-shadow: -4px 0 24px rgba(0,0,0,0.1);
   z-index: 100; display: flex; flex-direction: column;
-  padding: 16px; overflow-y: auto;
+  padding: calc(16px + var(--safe-top)) 16px calc(16px + var(--safe-bottom));
+  overflow-y: auto;
 }
 .history-header { display: flex; align-items: center; gap: 10px; margin-bottom: 12px; }
 .history-header h2 { flex: 1; font-size: 18px; font-weight: 700; }
@@ -759,7 +760,7 @@ body {
   #app.has-results .zhi-gua-row { margin-bottom: 0; }
 
   /* History full screen */
-  .history-panel { width: 100vw; width: 100dvw; padding: 12px; }
+  .history-panel { left: 0; right: 0; width: auto; padding: calc(12px + var(--safe-top)) 12px calc(12px + var(--safe-bottom)); }
   .history-header h2 { font-size: 16px; }
   .history-item { padding: 8px 10px; }
   .history-item .hi-title { font-size: 13px; }

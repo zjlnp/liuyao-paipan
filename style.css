@@ -47,6 +47,7 @@ body {
       rgba(0,0,0,0.035) 359.2deg, rgba(0,0,0,0.035) 360deg, transparent 360deg);
   box-shadow: 0 3px 20px rgba(0,0,0,0.04);
 }
+.bagua-circle.show { display: block; }
 .ba-trigram {
   position: absolute; font-size: 24px; color: #3a3530;
   font-family: serif; font-weight: 700; cursor: pointer;
@@ -198,13 +199,13 @@ body {
 .search-result-item .sr-name { font-weight: 600; }
 .search-result-item .sr-num { font-size: 10px; color: var(--text-muted); }
 
-.history-toggle {
+.history-toggle, .bagua-toggle {
   padding: 7px 16px; font-size: 14px; font-weight: 600; font-family: inherit;
   background: var(--card-bg); color: var(--text-secondary);
   border: 1.5px solid var(--border); border-radius: 8px; cursor: pointer;
   touch-action: manipulation;
 }
-.history-toggle:hover { border-color: var(--primary); color: var(--primary); background: #fdf2ef; }
+.history-toggle:hover, .bagua-toggle:hover { border-color: var(--primary); color: var(--primary); background: #fdf2ef; }
 
 /* ===== Input Area ===== */
 .input-area {
@@ -534,6 +535,7 @@ body {
 /* ---------- 平板 (< 960px) ---------- */
 @media (max-width: 959px) {
   .bagua-circle, .ba-popup { display: none !important; }
+  .bagua-toggle { display: none; }
 
   .title { font-size: 22px; }
   .top-bar { flex-wrap: wrap; gap: 6px; order: 0; }

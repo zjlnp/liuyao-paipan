@@ -20,6 +20,7 @@ document.addEventListener('DOMContentLoaded', () => {
   setupBaguaClicks();
   document.getElementById('divinate-btn').addEventListener('click', doDivination);
   document.getElementById('clear-btn').addEventListener('click', clearAll);
+  document.getElementById('bagua-toggle').addEventListener('click', toggleBagua);
   document.getElementById('history-toggle').addEventListener('click', toggleHistory);
   document.getElementById('history-close').addEventListener('click', () => toggleHistory(false));
   document.getElementById('history-clear-all').addEventListener('click', clearHistory);
@@ -492,6 +493,15 @@ function renderRefBox(r) {
     `<div class="ref-rule">${ruleHtml}</div>` +
     (textHtml ? `<div class="ref-text">${textHtml.replace(/\n/g, '<br>')}</div>` : '') +
     (baihuaHtml ? `<div class="ref-baihua">白话：${baihuaHtml}</div>` : '');
+}
+
+// ===== 八卦基础知识浮动框显示/隐藏 =====
+function toggleBagua() {
+  const circle = document.querySelector('.bagua-circle');
+  const popup = document.getElementById('ba-popup');
+  if (!circle) return;
+  const show = circle.classList.toggle('show');
+  if (!show && popup) popup.classList.remove('show');
 }
 
 // ===== 后天八卦点击 =====

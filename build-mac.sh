@@ -11,7 +11,7 @@ cd "$(dirname "$0")"
 APP_NAME="六爻排盘"
 BIN_NAME="LiuYaoPaiPan"
 BUNDLE_ID="com.liuyao.paipan"
-VERSION="4.5.0"
+VERSION="4.5.1"
 BUILD_DIR="build/mac"
 APP_DIR="$BUILD_DIR/${APP_NAME}.app"
 

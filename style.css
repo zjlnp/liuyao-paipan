@@ -221,7 +221,7 @@ body {
   touch-action: manipulation;
   -webkit-appearance: none; appearance: none;
 }
-.yao-num:focus { border-color: var(--primary); box-shadow: 0 0 0 4px rgba(196,69,54,0.1); transform: scale(1.05); background: #fff; }
+.yao-num:focus { border-color: var(--primary); box-shadow: 0 0 0 4px rgba(139,92,246,0.14); transform: scale(1.05); background: #fff; }
 .yao-num.filled { border-color: var(--primary); background: #fef9f7; }
 .yao-num.invalid { animation: shake 0.3s; }
 .yao-num::placeholder { color: #ccc; font-size: 18px; }
@@ -236,11 +236,11 @@ body {
   padding: 14px 40px; font-size: 20px; font-weight: 700; font-family: inherit;
   color: #fff; background: var(--primary); border: none;
   border-radius: 12px; cursor: pointer; white-space: nowrap;
-  box-shadow: 0 3px 12px rgba(196,69,54,0.25);
+  box-shadow: 0 3px 12px rgba(139,92,246,0.28);
   transition: all 0.2s;
   touch-action: manipulation;
 }
-.divinate-btn:hover { background: #e07a5f; transform: translateY(-2px); box-shadow: 0 6px 20px rgba(196,69,54,0.35); }
+.divinate-btn:hover { background: #7c3aed; transform: translateY(-2px); box-shadow: 0 6px 20px rgba(139,92,246,0.38); }
 
 .clear-btn {
   padding: 10px 20px; font-size: 15px; font-weight: 600; font-family: inherit;
@@ -611,7 +611,7 @@ body {
     border-width: 2px; border-radius: 12px;
   }
   .yao-num::placeholder { font-size: 14px; }
-  .yao-num:focus { transform: scale(1.03); box-shadow: 0 0 0 3px rgba(196,69,54,0.1); }
+  .yao-num:focus { transform: scale(1.03); box-shadow: 0 0 0 3px rgba(139,92,246,0.14); }
 
   .input-legend { font-size: 11px; text-align: center; padding: 0 4px; line-height: 1.5; }
 
@@ -739,54 +739,54 @@ body {
 .shensha-taohua { color:#b83280; font-weight:600; }
 .shensha-guiren { color:#2b6cb0; font-weight:600; }
 
-/* ===== 六爻装卦表 — HTML Table 格式 ===== */
-.zhuanggua-table-wrap { margin:0; }
-.zg-header { display:flex; flex-wrap:wrap; gap:4px 14px; padding:0 0 8px; font-size:11px; color:var(--text-secondary); }
-.zg-header b { color:var(--primary); font-weight:700; }
+/* ===== 六爻装卦表 ===== */
+.zhuanggua-table-wrap { margin: 4px 0 10px; width: 100%; }
+.zg-header {
+  display: flex; align-items: center; gap: 6px 18px; flex-wrap: wrap;
+  padding: 6px 12px; margin-bottom: 6px;
+  font-size: 12px; color: var(--text-secondary);
+  background: linear-gradient(135deg, rgba(139,92,246,0.07), rgba(139,92,246,0.02));
+  border-radius: 8px; border: 1px solid rgba(139,92,246,0.14);
+}
+.zg-header b { color: var(--primary); font-weight: 800; letter-spacing: 0.05em; }
+.zg-header span { color: var(--text-secondary); font-weight: 500; }
 
-.paipan-table { width:100%; border-collapse:collapse; font-size:13px; }
-.paipan-table thead th { padding:6px 3px; text-align:center; font-size:11px; font-weight:600; color:var(--text-secondary); border-bottom:2px solid var(--border); background:var(--bg); }
-.paipan-table tbody td { padding:7px 3px; text-align:center; border-bottom:1px solid #e8e3d8; vertical-align:middle; }
-.paipan-table tbody tr:hover { background:rgba(0,0,0,0.012); }
-.paipan-table tbody tr.yang-line td:first-child { color:var(--yang); }
-.paipan-table tbody tr.yin-line td:first-child { color:var(--yin); }
-.paipan-table tbody tr.shi-row { background:rgba(139,92,246,0.05); }
-.paipan-table tbody tr.ying-row { background:rgba(45,45,45,0.02); }
-.paipan-table tbody tr.changing { background:rgba(212,160,23,0.07); }
-.paipan-table tbody tr.changed td { color:var(--text-secondary); }
+.paipan-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+.paipan-table thead th {
+  padding: 7px 4px; text-align: center; font-size: 11px; font-weight: 700;
+  color: var(--text-muted); letter-spacing: 0.08em;
+  border-bottom: 2px solid var(--border); background: rgba(0,0,0,0.02);
+}
+.paipan-table tbody td {
+  padding: 7px 4px; text-align: center; font-size: 13px;
+  border-bottom: 1px solid #f0ede6; vertical-align: middle;
+  white-space: nowrap;
+}
+.paipan-table tbody tr:last-child td { border-bottom: none; }
+.paipan-table tbody tr { transition: background 0.15s; }
+.paipan-table tbody tr:hover { background: rgba(139,92,246,0.04); }
+.paipan-table tbody tr.shi-row { background: rgba(139,92,246,0.07); }
+.paipan-table tbody tr.ying-row { background: rgba(45,45,45,0.03); }
+.paipan-table tbody tr.changing td { background: rgba(212,160,23,0.08); font-weight: 600; }
 
-.col-gua { width:7%; min-width:44px; }
-.col-pos { width:7%; }
-.col-stem { width:5%; }
-.col-branch { width:6%; }
-.col-wx { width:6%; }
-.col-liuqin { width:8%; font-weight:700; }
-.col-fushen { width:8%; }
-.col-change { width:6%; }
-.col-shiying { width:5%; }
-.col-liushen { width:8%; }
+.col-liuqin { font-weight: 700; letter-spacing: 0.02em; }
 
-.yao-bar { display:flex; align-items:center; justify-content:center; min-height:24px; }
-.yang-seg { width:36px; height:5px; background:var(--primary); border-radius:3px; }
-.yao-bar.yin { gap:0; }
-.yin-seg { width:14px; height:5px; background:var(--yin); border-radius:3px; }
-.yin-gap { width:6px; height:5px; }
-tr.changing .yao-bar .yang-seg,
-tr.changing .yao-bar .yin-seg { animation: pulse-bar 1.5s ease-in-out infinite; }
-@keyframes pulse-bar { 0%,100%{opacity:1} 50%{opacity:0.4} }
-
-.change-marker { display:inline-block; font-size:11px; font-weight:700; padding:1px 5px; border-radius:3px; }
-.change-6 { color:#2d5016; background:rgba(45,80,22,0.08); }
-.change-9 { color:#9b2c2c; background:rgba(155,44,44,0.08); }
-
-.shi-tag { color:var(--primary); font-weight:700; }
-.ying-tag { color:var(--text-secondary); font-weight:600; }
+.shi-tag {
+  display: inline-block; min-width: 22px; padding: 1px 6px;
+  color: #fff; background: var(--primary); border-radius: 4px;
+  font-size: 11px; font-weight: 700; line-height: 1.5;
+}
+.ying-tag {
+  display: inline-block; min-width: 22px; padding: 1px 6px;
+  color: var(--primary); background: rgba(139,92,246,0.12); border-radius: 4px;
+  font-size: 11px; font-weight: 700; line-height: 1.5;
+}
 
 .liushen-青龙 { color:#2b6cb0; }
 .liushen-朱雀 { color:#c53030; }
 .liushen-勾陈 { color:#975a16; }
-.liushen-腾蛇 { color:#805ad5; }
+.liushen-螣蛇 { color:#805ad5; }
 .liushen-白虎 { color:#2d3748; font-weight:700; }
 .liushen-玄武 { color:#276749; }
 
-.fushen-inline { font-size:11px; color:var(--text-muted); font-style:italic; }
+.fushen-inline { font-size: 11px; color: var(--text-muted); font-style: italic; }

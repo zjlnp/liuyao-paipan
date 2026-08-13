@@ -6,6 +6,11 @@
 
   function loadData() {
     if (hexagramData) return Promise.resolve(hexagramData);
+    // 内联数据（由 build.js 注入 window.__LIUYAO_DATA__），否则回退到 fetch
+    if (typeof window.__LIUYAO_DATA__ !== 'undefined') {
+      hexagramData = window.__LIUYAO_DATA__;
+      return Promise.resolve(hexagramData);
+    }
     if (!initPromise) {
       initPromise = fetch('data/hexagrams.json')
         .then(r => { if (!r.ok) throw new Error('数据加载失败'); return r.json(); })

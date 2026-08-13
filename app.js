@@ -242,10 +242,6 @@ function renderGuaCard(prefix, gua, changingYaos, isBian, zhuanggua) {
   const yingPos = bagong.yingyao || 0;
 
   // Lines with click-to-expand yaoci
-  var zgMap = {};
-  if (zhuanggua && zhuanggua.yaoList) {
-    zhuanggua.yaoList.forEach(function(y) { zgMap[y.position] = y; });
-  }
   const container = document.getElementById(prefix+'-lines');
   container.innerHTML = '';
   const display = gua.lines_display || [];
@@ -315,24 +311,6 @@ function renderGuaCard(prefix, gua, changingYaos, isBian, zhuanggua) {
     if (isShi) tag.classList.add('has-shi');
     if (isYing) tag.classList.add('has-ying');
     right.appendChild(tag);
-    var zgInfo = zgMap[pos];
-    if (zgInfo) {
-      var zgSpan = document.createElement('span');
-      zgSpan.className = 'yao-zg-sub';
-      zgSpan.textContent = zgInfo.liushou + ' ' + zgInfo.liuqin + zgInfo.nazhi + zgInfo.wuxing;
-      zgSpan.style.color = window.ZhuangGua ? window.ZhuangGua.getLiuqinColor(zgInfo.liuqin) : '#5a5550';
-      right.appendChild(zgSpan);
-      // 伏神：本宫卦中缺失的六亲，红色 ↑ 标记
-      if (zhuanggua && zhuanggua.fushen) {
-        var fs = zhuanggua.fushen.find(function(f) { return f.position === pos; });
-        if (fs) {
-          var fsSpan = document.createElement('span');
-          fsSpan.className = 'yao-zg-sub yao-fushen';
-          fsSpan.textContent = '↑伏：' + fs.fushenLiuqin + fs.fushenNazhi;
-          right.appendChild(fsSpan);
-        }
-      }
-    }
     main.appendChild(right);
 
     // Click to toggle expand, Shift+click to toggle changing yao
@@ -362,6 +340,63 @@ function renderGuaCard(prefix, gua, changingYaos, isBian, zhuanggua) {
 
     container.appendChild(row);
   }
+
+  // 装卦表（六神/伏神/六亲/干支/五行/世应）
+  renderZhuangGuaTable(prefix, zhuanggua, isBian, changingYaos);
+}
+
+// ===== 装卦表 =====
+function renderZhuangGuaTable(prefix, zhuanggua, isBian, changingYaos) {
+  const wrap = document.getElementById(prefix + '-zhuanggua');
+  if (!wrap) return;
+  if (!zhuanggua || !zhuanggua.yaoList || zhuanggua.yaoList.length !== 6) { wrap.innerHTML = ''; return; }
+  const ZG = window.ZhuangGua;
+  const colorOf = ZG && ZG.getLiuqinColor ? ZG.getLiuqinColor : function(){ return '#999'; };
+
+  const shi = zhuanggua.shiYao, ying = zhuanggua.yingYao;
+  const pn = {1:'初',2:'二',3:'三',4:'四',5:'五',6:'上'};
+
+  const fushenMap = {};
+  (zhuanggua.fushen || []).forEach(function(f){ fushenMap[f.position] = f; });
+
+  let h = '<div class="zg-header">';
+  h += '<b>' + zhuanggua.palace + '·' + zhuanggua.gongWuxing + '</b>';
+  h += '<span>世 ' + pn[shi] + '爻</span>';
+  h += '<span>应 ' + pn[ying] + '爻</span>';
+  h += '</div>';
+
+  h += '<table class="paipan-table"><thead><tr>';
+  h += '<th>六神</th><th>伏神</th><th>六亲</th><th>干支</th><th>五行</th><th>世应</th>';
+  h += '</tr></thead><tbody>';
+
+  // 自上爻（第6爻）向下到初爻，与卦象图顺序一致
+  for (let pos = 6; pos >= 1; pos--) {
+    const y = zhuanggua.yaoList.find(function(x){ return x.position === pos; });
+    if (!y) continue;
+    const fs = fushenMap[pos];
+    const isChanging = !isBian && changingYaos.indexOf(pos) >= 0;
+    const isChanged = isBian && changingYaos.indexOf(pos) >= 0;
+    const isShi = pos === shi, isYing = pos === ying;
+
+    const cls = [
+      y.isYang ? 'yang-line' : 'yin-line',
+      isChanging ? 'changing' : '',
+      isChanged ? 'changed' : '',
+      isShi ? 'shi-row' : '',
+      isYing ? 'ying-row' : ''
+    ].filter(Boolean).join(' ');
+
+    h += '<tr class="' + cls + '">';
+    h += '<td class="liushen-' + y.liushou + '">' + y.liushou + '</td>';
+    h += '<td class="fushen-inline">' + (fs ? (fs.fushenLiuqin + ' ' + fs.fushenNazhi) : '') + '</td>';
+    h += '<td class="col-liuqin" style="color:' + colorOf(y.liuqin) + '">' + y.liuqin + '</td>';
+    h += '<td>' + y.nazhi + '</td>';
+    h += '<td>' + y.wuxing + '</td>';
+    h += '<td>' + (isShi ? '<span class="shi-tag">世</span>' : (isYing ? '<span class="ying-tag">应</span>' : '')) + '</td>';
+    h += '</tr>';
+  }
+  h += '</tbody></table>';
+  wrap.innerHTML = h;
 }
 
 // ===== Render Reference Box — 朱熹考变占法 =====

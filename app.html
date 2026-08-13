@@ -12,7 +12,7 @@
 <link rel="apple-touch-icon" sizes="180x180" href="icons/icon-180.png">
 <link rel="apple-touch-icon" sizes="192x192" href="icons/icon-192.png">
 <link rel="icon" type="image/svg+xml" href="icons/icon.svg">
-<title>六爻排盘 v4.4</title>
+<title>六爻排盘 v4.5</title>
 <style>
 /* ===== 金钱卦 PWA v2.0 — 移动端适配 ===== */
 :root {
@@ -273,7 +273,7 @@ body {
 
 /* ===== Gua Card ===== */
 .gua-card {
-  flex: 0 0 420px; width: 420px;
+  flex: 0 0 440px; width: 440px;
   background: var(--card-bg); border: 1.5px solid var(--border);
   border-radius: 16px; padding: 14px 24px 16px;
   box-shadow: 0 2px 8px rgba(0,0,0,0.05); position: relative;
@@ -351,16 +351,16 @@ body {
 .gua-line-main:hover { background: #fdfaf6; }
 
 .gua-line-left {
-  width: 36px; flex-shrink: 0; display: flex; align-items: center; justify-content: center; gap: 2px;
+  width: 30px; flex-shrink: 0; display: flex; align-items: center; justify-content: center; gap: 2px;
 }
 .gua-line-main .expand-icon { font-size: 10px; color: var(--text-muted); transition: transform 0.2s; }
 .gua-line-row.open .expand-icon { transform: rotate(90deg); }
 .gua-line-main .change-marker { font-size: 14px; color: var(--gold); font-weight: 700; }
 
 .gua-line-bar-wrap { flex: 1; display: flex; justify-content: center; align-items: center; }
-.gua-line-main .yang-bar { width: 200px; height: 20px; background: var(--yang); border-radius: 5px; flex-shrink: 0; }
-.gua-line-main .yin-bar { display: flex; gap: 26px; flex-shrink: 0; }
-.gua-line-main .yin-bar .half { width: 87px; height: 20px; background: var(--yin); border-radius: 5px; flex-shrink: 0; }
+.gua-line-main .yang-bar { width: 130px; height: 20px; background: var(--yang); border-radius: 5px; flex-shrink: 0; }
+.gua-line-main .yin-bar { display: flex; gap: 16px; flex-shrink: 0; }
+.gua-line-main .yin-bar .half { width: 57px; height: 20px; background: var(--yin); border-radius: 5px; flex-shrink: 0; }
 
 .gua-line-row.changing .yang-bar { background: var(--gold); box-shadow: 0 0 12px rgba(184,134,11,0.3); animation: pulse 2s infinite; }
 .gua-line-row.changing .yin-bar .half { background: var(--gold); box-shadow: 0 0 12px rgba(184,134,11,0.3); animation: pulse 2s infinite; }
@@ -371,7 +371,7 @@ body {
 .gua-line-row.changed .yin-bar .half { background: #5a5a5a; }
 
 .gua-line-right {
-  width: 90px; flex-shrink: 0; display: flex; align-items: flex-end; justify-content: center; gap: 2px; margin-left: 12px; flex-direction: column;
+  width: 80px; flex-shrink: 0; display: flex; align-items: flex-end; justify-content: center; gap: 2px; flex-direction: column;
 }
 .gua-line-main .yao-tag { font-size: 13px; color: #3a3530; white-space: nowrap; font-weight: 600; }
 .gua-line-row.changing .yao-tag { color: var(--gold); font-weight: 700; }
@@ -380,6 +380,24 @@ body {
 .yao-tag.has-ying { font-weight: 600 !important; }
 .yao-zg-sub { font-size: 10px; color: #5a5550; white-space: nowrap; font-weight: 500; line-height: 1.3; }
 .yao-fushen { color: #c44536 !important; font-weight: 600; }
+
+/* ===== 爻行内装卦信息（六神/六亲/伏神 ← 爻线 → 干支/五行）===== */
+.gua-line-zg-left {
+  width: 76px; flex-shrink: 0;
+  display: flex; flex-direction: column; align-items: flex-end; justify-content: center;
+  line-height: 1.3; padding-right: 8px;
+}
+.gua-line-zg-left .zliushen { font-size: 11px; letter-spacing: 0.03em; }
+.gua-line-zg-left .zliuqin { font-size: 13px; font-weight: 700; }
+.gua-line-zg-left .zfushen { font-size: 10px; font-style: italic; color: #c44536; }
+
+.gua-line-zg-right {
+  width: 76px; flex-shrink: 0;
+  display: flex; flex-direction: column; align-items: flex-start; justify-content: center;
+  line-height: 1.3; padding-left: 8px;
+}
+.gua-line-zg-right .znazhi { font-size: 13px; font-weight: 600; color: #3a3530; }
+.gua-line-zg-right .zwuxing { font-size: 11px; color: var(--text-secondary); }
 
 
 
@@ -555,9 +573,10 @@ body {
   }
   .gua-unicode { font-size: 40px; }
   .gua-name { font-size: 19px; }
-  .gua-line-main .yang-bar { width: 160px; }
-  .gua-line-main .yin-bar { gap: 20px; }
-  .gua-line-main .yin-bar .half { width: 70px; }
+  .gua-line-main .yang-bar { width: 110px; }
+  .gua-line-main .yin-bar { gap: 14px; }
+  .gua-line-main .yin-bar .half { width: 48px; }
+  .gua-line-zg-left, .gua-line-zg-right { width: 66px; }
 
   /* Middle becomes horizontal divider */
   .middle-col {
@@ -654,11 +673,17 @@ body {
   .gua-header { gap: 4px; margin: 2px 0 4px; }
 
   .gua-line-main { padding: 8px 0; } /* taller tap target */
-  .gua-line-main .yang-bar { width: 140px; height: 18px; }
-  .gua-line-main .yin-bar { gap: 18px; }
-  .gua-line-main .yin-bar .half { width: 61px; height: 18px; }
-  .gua-line-left { width: 28px; }
-  .gua-line-right { width: 64px; }
+  .gua-line-main .yang-bar { width: 90px; height: 18px; }
+  .gua-line-main .yin-bar { gap: 10px; }
+  .gua-line-main .yin-bar .half { width: 40px; height: 18px; }
+  .gua-line-left { width: 24px; }
+  .gua-line-right { width: 52px; }
+  .gua-line-zg-left, .gua-line-zg-right { width: 54px; }
+  .gua-line-zg-left { padding-right: 4px; }
+  .gua-line-zg-right { padding-left: 4px; }
+  .gua-line-zg-left .zliushen, .gua-line-zg-right .zwuxing { font-size: 9px; }
+  .gua-line-zg-left .zliuqin, .gua-line-zg-right .znazhi { font-size: 11px; }
+  .gua-line-zg-left .zfushen { font-size: 9px; }
   .gua-line-main .yao-tag { font-size: 10px; }
   .yao-detail-drop { padding: 6px 10px 6px 32px; font-size: 12px; }
 
@@ -720,9 +745,10 @@ body {
   .input-btns { max-width: 260px; }
   .divinate-btn { font-size: 16px; padding: 12px 16px; }
 
-  .gua-line-main .yang-bar { width: 110px; height: 16px; }
-  .gua-line-main .yin-bar { gap: 14px; }
-  .gua-line-main .yin-bar .half { width: 48px; height: 16px; }
+  .gua-line-main .yang-bar { width: 80px; height: 16px; }
+  .gua-line-main .yin-bar { gap: 8px; }
+  .gua-line-main .yin-bar .half { width: 35px; height: 16px; }
+  .gua-line-zg-left, .gua-line-zg-right { width: 48px; }
 }
 
 /* ---------- 横屏手机 (高度不足) ---------- */
@@ -745,8 +771,9 @@ body {
 @media (min-width: 1400px) {
   #app { max-width: 1200px; }
   .gua-card { flex: 0 0 460px; width: 460px; }
-  .gua-line-main .yang-bar { width: 240px; }
-  .gua-line-main .yin-bar .half { width: 107px; }
+  .gua-line-main .yang-bar { width: 140px; }
+  .gua-line-main .yin-bar .half { width: 62px; }
+  .gua-line-zg-left, .gua-line-zg-right { width: 84px; }
 }
 
 /* ===== 排盘信息（本卦卡片顶部）===== */
@@ -900,7 +927,6 @@ body {
           <div class="daxiang-toggle-body" id="ben-daxiang-body"></div>
         </div>
       </div>
-      <div class="zhuanggua-table-wrap" id="ben-zhuanggua"></div>
       <div class="gua-visual" id="ben-lines"></div>
     </div>
 
@@ -936,7 +962,6 @@ body {
           <div class="daxiang-toggle-body" id="bian-daxiang-body"></div>
         </div>
       </div>
-      <div class="zhuanggua-table-wrap" id="bian-zhuanggua"></div>
       <div class="gua-visual" id="bian-lines"></div>
     </div>
   </div>
@@ -10876,7 +10901,15 @@ function renderGuaCard(prefix, gua, changingYaos, isBian, zhuanggua) {
 
   document.getElementById(prefix+'-unicode').textContent = gua.unicode||'';
   document.getElementById(prefix+'-name').textContent = gua.fullName||gua.name;
-  document.getElementById(prefix+'-number').textContent = `第${gua.id}卦 ${gua.upper||''}上${gua.lower||''}下`;
+  let numTxt = `第${gua.id}卦 ${gua.upper||''}上${gua.lower||''}下`;
+  if (zhuanggua) {
+    if (zhuanggua.liuqinPalace && zhuanggua.liuqinPalace !== zhuanggua.palace) {
+      numTxt += ` · ${zhuanggua.palace}·${zhuanggua.gongWuxing}（六亲随${zhuanggua.liuqinPalace}）`;
+    } else {
+      numTxt += ` · ${zhuanggua.palace}·${zhuanggua.gongWuxing}`;
+    }
+  }
+  document.getElementById(prefix+'-number').textContent = numTxt;
   document.getElementById(prefix+'-shiyi').textContent = gua.guaming_shiyi || '';
 
   // Guaci toggle (collapsed by default)
@@ -10922,6 +10955,15 @@ function renderGuaCard(prefix, gua, changingYaos, isBian, zhuanggua) {
   const shiPos = bagong.shiyao || 0;
   const yingPos = bagong.yingyao || 0;
 
+  // 装卦信息（六神/六亲/干支/五行）与伏神，按爻位映射
+  const colorOf = (window.ZhuangGua && window.ZhuangGua.getLiuqinColor) ? window.ZhuangGua.getLiuqinColor : function(){ return '#999'; };
+  const zgMap = {};
+  const fushenMap = {};
+  if (zhuanggua && zhuanggua.yaoList && zhuanggua.yaoList.length === 6) {
+    zhuanggua.yaoList.forEach(function(y){ zgMap[y.position] = y; });
+    (zhuanggua.fushen || []).forEach(function(f){ fushenMap[f.position] = f; });
+  }
+
   // Lines with click-to-expand yaoci
   const container = document.getElementById(prefix+'-lines');
   container.innerHTML = '';
@@ -10934,6 +10976,7 @@ function renderGuaCard(prefix, gua, changingYaos, isBian, zhuanggua) {
     const isShi = (pos === shiPos);
     const isYing = (pos === yingPos);
     const yaoName = line.name;
+    const zgy = zgMap[pos];
 
     // Get yaoci + xiaoxiang
     let yaoOrig = '', yaoBai = '', yaoXiao = '';
@@ -10967,6 +11010,29 @@ function renderGuaCard(prefix, gua, changingYaos, isBian, zhuanggua) {
     }
     main.appendChild(left);
 
+    // 装卦信息（左）：六神 + 六亲（+伏神）
+    if (zgy) {
+      const zgLeft = document.createElement('div');
+      zgLeft.className = 'gua-line-zg-left';
+      const ls = document.createElement('span');
+      ls.className = 'zliushen liushen-' + zgy.liushou;
+      ls.textContent = zgy.liushou;
+      zgLeft.appendChild(ls);
+      const lq = document.createElement('span');
+      lq.className = 'zliuqin';
+      lq.style.color = colorOf(zgy.liuqin);
+      lq.textContent = zgy.liuqin;
+      zgLeft.appendChild(lq);
+      const fs = fushenMap[pos];
+      if (fs) {
+        const fse = document.createElement('span');
+        fse.className = 'zfushen';
+        fse.textContent = '伏·' + fs.fushenLiuqin + fs.fushenNazhi;
+        zgLeft.appendChild(fse);
+      }
+      main.appendChild(zgLeft);
+    }
+
     // Center: bar (wrapped for centering)
     const barWrap = document.createElement('div');
     barWrap.className = 'gua-line-bar-wrap';
@@ -10979,6 +11045,21 @@ function renderGuaCard(prefix, gua, changingYaos, isBian, zhuanggua) {
       barWrap.appendChild(yb);
     }
     main.appendChild(barWrap);
+
+    // 装卦信息（右）：干支 + 五行
+    if (zgy) {
+      const zgRight = document.createElement('div');
+      zgRight.className = 'gua-line-zg-right';
+      const nz = document.createElement('span');
+      nz.className = 'znazhi';
+      nz.textContent = zgy.nazhi;
+      zgRight.appendChild(nz);
+      const wx = document.createElement('span');
+      wx.className = 'zwuxing';
+      wx.textContent = zgy.wuxing;
+      zgRight.appendChild(wx);
+      main.appendChild(zgRight);
+    }
 
     // Right: yao name + shi/ying
     const right = document.createElement('div');
@@ -11021,68 +11102,6 @@ function renderGuaCard(prefix, gua, changingYaos, isBian, zhuanggua) {
 
     container.appendChild(row);
   }
-
-  // 装卦表（六神/伏神/六亲/干支/五行/世应）
-  renderZhuangGuaTable(prefix, zhuanggua, isBian, changingYaos);
-}
-
-// ===== 装卦表 =====
-function renderZhuangGuaTable(prefix, zhuanggua, isBian, changingYaos) {
-  const wrap = document.getElementById(prefix + '-zhuanggua');
-  if (!wrap) return;
-  if (!zhuanggua || !zhuanggua.yaoList || zhuanggua.yaoList.length !== 6) { wrap.innerHTML = ''; return; }
-  const ZG = window.ZhuangGua;
-  const colorOf = ZG && ZG.getLiuqinColor ? ZG.getLiuqinColor : function(){ return '#999'; };
-
-  const shi = zhuanggua.shiYao, ying = zhuanggua.yingYao;
-  const pn = {1:'初',2:'二',3:'三',4:'四',5:'五',6:'上'};
-
-  const fushenMap = {};
-  const hasFushen = !!(zhuanggua.fushen && zhuanggua.fushen.length > 0);
-  (zhuanggua.fushen || []).forEach(function(f){ fushenMap[f.position] = f; });
-
-  let h = '<div class="zg-header">';
-  if (zhuanggua.liuqinPalace && zhuanggua.liuqinPalace !== zhuanggua.palace) {
-    h += '<b>' + zhuanggua.palace + '</b><span>六亲随' + zhuanggua.liuqinPalace + '·' + zhuanggua.gongWuxing + '</span>';
-  } else {
-    h += '<b>' + zhuanggua.palace + '·' + zhuanggua.gongWuxing + '</b>';
-  }
-  h += '<span>世 ' + pn[shi] + '爻</span>';
-  h += '<span>应 ' + pn[ying] + '爻</span>';
-  h += '</div>';
-
-  h += '<table class="paipan-table"><thead><tr>';
-  h += '<th>六神</th>' + (hasFushen ? '<th>伏神</th>' : '') + '<th>六亲</th><th>干支</th><th>五行</th><th>世应</th>';
-  h += '</tr></thead><tbody>';
-
-  // 自上爻（第6爻）向下到初爻，与卦象图顺序一致
-  for (let pos = 6; pos >= 1; pos--) {
-    const y = zhuanggua.yaoList.find(function(x){ return x.position === pos; });
-    if (!y) continue;
-    const fs = fushenMap[pos];
-    const isChanging = !isBian && changingYaos.indexOf(pos) >= 0;
-    const isChanged = isBian && changingYaos.indexOf(pos) >= 0;
-    const isShi = pos === shi, isYing = pos === ying;
-
-    const cls = [
-      y.isYang ? 'yang-line' : 'yin-line',
-      isChanging ? 'changing' : '',
-      isChanged ? 'changed' : '',
-      isShi ? 'shi-row' : '',
-      isYing ? 'ying-row' : ''
-    ].filter(Boolean).join(' ');
-
-    h += '<tr class="' + cls + '">';
-    h += '<td class="liushen-' + y.liushou + '">' + y.liushou + '</td>';
-    if (hasFushen) h += '<td class="fushen-inline">' + (fs ? (fs.fushenLiuqin + ' ' + fs.fushenNazhi) : '') + '</td>';
-    h += '<td class="col-liuqin" style="color:' + colorOf(y.liuqin) + '">' + y.liuqin + '</td>';
-    h += '<td>' + y.nazhi + '</td>';
-    h += '<td>' + y.wuxing + '</td>';
-    h += '<td>' + (isShi ? '<span class="shi-tag">世</span>' : (isYing ? '<span class="ying-tag">应</span>' : '')) + '</td>';
-    h += '</tr>';
-  }
-  h += '</tbody></table>';
-  wrap.innerHTML = h;
 }
 
 // ===== Render Reference Box — 朱熹考变占法 =====

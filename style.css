@@ -257,7 +257,7 @@ body {
 
 /* ===== Gua Card ===== */
 .gua-card {
-  flex: 0 0 420px; width: 420px;
+  flex: 0 0 440px; width: 440px;
   background: var(--card-bg); border: 1.5px solid var(--border);
   border-radius: 16px; padding: 14px 24px 16px;
   box-shadow: 0 2px 8px rgba(0,0,0,0.05); position: relative;
@@ -335,16 +335,16 @@ body {
 .gua-line-main:hover { background: #fdfaf6; }
 
 .gua-line-left {
-  width: 36px; flex-shrink: 0; display: flex; align-items: center; justify-content: center; gap: 2px;
+  width: 30px; flex-shrink: 0; display: flex; align-items: center; justify-content: center; gap: 2px;
 }
 .gua-line-main .expand-icon { font-size: 10px; color: var(--text-muted); transition: transform 0.2s; }
 .gua-line-row.open .expand-icon { transform: rotate(90deg); }
 .gua-line-main .change-marker { font-size: 14px; color: var(--gold); font-weight: 700; }
 
 .gua-line-bar-wrap { flex: 1; display: flex; justify-content: center; align-items: center; }
-.gua-line-main .yang-bar { width: 200px; height: 20px; background: var(--yang); border-radius: 5px; flex-shrink: 0; }
-.gua-line-main .yin-bar { display: flex; gap: 26px; flex-shrink: 0; }
-.gua-line-main .yin-bar .half { width: 87px; height: 20px; background: var(--yin); border-radius: 5px; flex-shrink: 0; }
+.gua-line-main .yang-bar { width: 130px; height: 20px; background: var(--yang); border-radius: 5px; flex-shrink: 0; }
+.gua-line-main .yin-bar { display: flex; gap: 16px; flex-shrink: 0; }
+.gua-line-main .yin-bar .half { width: 57px; height: 20px; background: var(--yin); border-radius: 5px; flex-shrink: 0; }
 
 .gua-line-row.changing .yang-bar { background: var(--gold); box-shadow: 0 0 12px rgba(184,134,11,0.3); animation: pulse 2s infinite; }
 .gua-line-row.changing .yin-bar .half { background: var(--gold); box-shadow: 0 0 12px rgba(184,134,11,0.3); animation: pulse 2s infinite; }
@@ -355,7 +355,7 @@ body {
 .gua-line-row.changed .yin-bar .half { background: #5a5a5a; }
 
 .gua-line-right {
-  width: 90px; flex-shrink: 0; display: flex; align-items: flex-end; justify-content: center; gap: 2px; margin-left: 12px; flex-direction: column;
+  width: 80px; flex-shrink: 0; display: flex; align-items: flex-end; justify-content: center; gap: 2px; flex-direction: column;
 }
 .gua-line-main .yao-tag { font-size: 13px; color: #3a3530; white-space: nowrap; font-weight: 600; }
 .gua-line-row.changing .yao-tag { color: var(--gold); font-weight: 700; }
@@ -364,6 +364,24 @@ body {
 .yao-tag.has-ying { font-weight: 600 !important; }
 .yao-zg-sub { font-size: 10px; color: #5a5550; white-space: nowrap; font-weight: 500; line-height: 1.3; }
 .yao-fushen { color: #c44536 !important; font-weight: 600; }
+
+/* ===== 爻行内装卦信息（六神/六亲/伏神 ← 爻线 → 干支/五行）===== */
+.gua-line-zg-left {
+  width: 76px; flex-shrink: 0;
+  display: flex; flex-direction: column; align-items: flex-end; justify-content: center;
+  line-height: 1.3; padding-right: 8px;
+}
+.gua-line-zg-left .zliushen { font-size: 11px; letter-spacing: 0.03em; }
+.gua-line-zg-left .zliuqin { font-size: 13px; font-weight: 700; }
+.gua-line-zg-left .zfushen { font-size: 10px; font-style: italic; color: #c44536; }
+
+.gua-line-zg-right {
+  width: 76px; flex-shrink: 0;
+  display: flex; flex-direction: column; align-items: flex-start; justify-content: center;
+  line-height: 1.3; padding-left: 8px;
+}
+.gua-line-zg-right .znazhi { font-size: 13px; font-weight: 600; color: #3a3530; }
+.gua-line-zg-right .zwuxing { font-size: 11px; color: var(--text-secondary); }
 
 
 
@@ -539,9 +557,10 @@ body {
   }
   .gua-unicode { font-size: 40px; }
   .gua-name { font-size: 19px; }
-  .gua-line-main .yang-bar { width: 160px; }
-  .gua-line-main .yin-bar { gap: 20px; }
-  .gua-line-main .yin-bar .half { width: 70px; }
+  .gua-line-main .yang-bar { width: 110px; }
+  .gua-line-main .yin-bar { gap: 14px; }
+  .gua-line-main .yin-bar .half { width: 48px; }
+  .gua-line-zg-left, .gua-line-zg-right { width: 66px; }
 
   /* Middle becomes horizontal divider */
   .middle-col {
@@ -638,11 +657,17 @@ body {
   .gua-header { gap: 4px; margin: 2px 0 4px; }
 
   .gua-line-main { padding: 8px 0; } /* taller tap target */
-  .gua-line-main .yang-bar { width: 140px; height: 18px; }
-  .gua-line-main .yin-bar { gap: 18px; }
-  .gua-line-main .yin-bar .half { width: 61px; height: 18px; }
-  .gua-line-left { width: 28px; }
-  .gua-line-right { width: 64px; }
+  .gua-line-main .yang-bar { width: 90px; height: 18px; }
+  .gua-line-main .yin-bar { gap: 10px; }
+  .gua-line-main .yin-bar .half { width: 40px; height: 18px; }
+  .gua-line-left { width: 24px; }
+  .gua-line-right { width: 52px; }
+  .gua-line-zg-left, .gua-line-zg-right { width: 54px; }
+  .gua-line-zg-left { padding-right: 4px; }
+  .gua-line-zg-right { padding-left: 4px; }
+  .gua-line-zg-left .zliushen, .gua-line-zg-right .zwuxing { font-size: 9px; }
+  .gua-line-zg-left .zliuqin, .gua-line-zg-right .znazhi { font-size: 11px; }
+  .gua-line-zg-left .zfushen { font-size: 9px; }
   .gua-line-main .yao-tag { font-size: 10px; }
   .yao-detail-drop { padding: 6px 10px 6px 32px; font-size: 12px; }
 
@@ -704,9 +729,10 @@ body {
   .input-btns { max-width: 260px; }
   .divinate-btn { font-size: 16px; padding: 12px 16px; }
 
-  .gua-line-main .yang-bar { width: 110px; height: 16px; }
-  .gua-line-main .yin-bar { gap: 14px; }
-  .gua-line-main .yin-bar .half { width: 48px; height: 16px; }
+  .gua-line-main .yang-bar { width: 80px; height: 16px; }
+  .gua-line-main .yin-bar { gap: 8px; }
+  .gua-line-main .yin-bar .half { width: 35px; height: 16px; }
+  .gua-line-zg-left, .gua-line-zg-right { width: 48px; }
 }
 
 /* ---------- 横屏手机 (高度不足) ---------- */
@@ -729,8 +755,9 @@ body {
 @media (min-width: 1400px) {
   #app { max-width: 1200px; }
   .gua-card { flex: 0 0 460px; width: 460px; }
-  .gua-line-main .yang-bar { width: 240px; }
-  .gua-line-main .yin-bar .half { width: 107px; }
+  .gua-line-main .yang-bar { width: 140px; }
+  .gua-line-main .yin-bar .half { width: 62px; }
+  .gua-line-zg-left, .gua-line-zg-right { width: 84px; }
 }
 
 /* ===== 排盘信息（本卦卡片顶部）===== */

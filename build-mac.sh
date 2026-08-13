@@ -11,7 +11,7 @@ cd "$(dirname "$0")"
 APP_NAME="六爻排盘"
 BIN_NAME="LiuYaoPaiPan"
 BUNDLE_ID="com.liuyao.paipan"
-VERSION="4.4.0"
+VERSION="4.5.0"
 BUILD_DIR="build/mac"
 APP_DIR="$BUILD_DIR/${APP_NAME}.app"
 
@@ -47,7 +47,7 @@ cat > "$APP_DIR/Contents/Info.plist" <<EOF
     <key>CFBundleShortVersionString</key>
     <string>${VERSION}</string>
     <key>CFBundleVersion</key>
-    <string>8</string>
+    <string>9</string>
     <key>LSMinimumSystemVersion</key>
     <string>11.0</string>
     <key>LSRequiresNativeExecution</key>

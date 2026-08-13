@@ -190,7 +190,15 @@ function renderGuaCard(prefix, gua, changingYaos, isBian, zhuanggua) {
 
   document.getElementById(prefix+'-unicode').textContent = gua.unicode||'';
   document.getElementById(prefix+'-name').textContent = gua.fullName||gua.name;
-  document.getElementById(prefix+'-number').textContent = `第${gua.id}卦 ${gua.upper||''}上${gua.lower||''}下`;
+  let numTxt = `第${gua.id}卦 ${gua.upper||''}上${gua.lower||''}下`;
+  if (zhuanggua) {
+    if (zhuanggua.liuqinPalace && zhuanggua.liuqinPalace !== zhuanggua.palace) {
+      numTxt += ` · ${zhuanggua.palace}·${zhuanggua.gongWuxing}（六亲随${zhuanggua.liuqinPalace}）`;
+    } else {
+      numTxt += ` · ${zhuanggua.palace}·${zhuanggua.gongWuxing}`;
+    }
+  }
+  document.getElementById(prefix+'-number').textContent = numTxt;
   document.getElementById(prefix+'-shiyi').textContent = gua.guaming_shiyi || '';
 
   // Guaci toggle (collapsed by default)
@@ -236,6 +244,15 @@ function renderGuaCard(prefix, gua, changingYaos, isBian, zhuanggua) {
   const shiPos = bagong.shiyao || 0;
   const yingPos = bagong.yingyao || 0;
 
+  // 装卦信息（六神/六亲/干支/五行）与伏神，按爻位映射
+  const colorOf = (window.ZhuangGua && window.ZhuangGua.getLiuqinColor) ? window.ZhuangGua.getLiuqinColor : function(){ return '#999'; };
+  const zgMap = {};
+  const fushenMap = {};
+  if (zhuanggua && zhuanggua.yaoList && zhuanggua.yaoList.length === 6) {
+    zhuanggua.yaoList.forEach(function(y){ zgMap[y.position] = y; });
+    (zhuanggua.fushen || []).forEach(function(f){ fushenMap[f.position] = f; });
+  }
+
   // Lines with click-to-expand yaoci
   const container = document.getElementById(prefix+'-lines');
   container.innerHTML = '';
@@ -248,6 +265,7 @@ function renderGuaCard(prefix, gua, changingYaos, isBian, zhuanggua) {
     const isShi = (pos === shiPos);
     const isYing = (pos === yingPos);
     const yaoName = line.name;
+    const zgy = zgMap[pos];
 
     // Get yaoci + xiaoxiang
     let yaoOrig = '', yaoBai = '', yaoXiao = '';
@@ -281,6 +299,29 @@ function renderGuaCard(prefix, gua, changingYaos, isBian, zhuanggua) {
     }
     main.appendChild(left);
 
+    // 装卦信息（左）：六神 + 六亲（+伏神）
+    if (zgy) {
+      const zgLeft = document.createElement('div');
+      zgLeft.className = 'gua-line-zg-left';
+      const ls = document.createElement('span');
+      ls.className = 'zliushen liushen-' + zgy.liushou;
+      ls.textContent = zgy.liushou;
+      zgLeft.appendChild(ls);
+      const lq = document.createElement('span');
+      lq.className = 'zliuqin';
+      lq.style.color = colorOf(zgy.liuqin);
+      lq.textContent = zgy.liuqin;
+      zgLeft.appendChild(lq);
+      const fs = fushenMap[pos];
+      if (fs) {
+        const fse = document.createElement('span');
+        fse.className = 'zfushen';
+        fse.textContent = '伏·' + fs.fushenLiuqin + fs.fushenNazhi;
+        zgLeft.appendChild(fse);
+      }
+      main.appendChild(zgLeft);
+    }
+
     // Center: bar (wrapped for centering)
     const barWrap = document.createElement('div');
     barWrap.className = 'gua-line-bar-wrap';
@@ -293,6 +334,21 @@ function renderGuaCard(prefix, gua, changingYaos, isBian, zhuanggua) {
       barWrap.appendChild(yb);
     }
     main.appendChild(barWrap);
+
+    // 装卦信息（右）：干支 + 五行
+    if (zgy) {
+      const zgRight = document.createElement('div');
+      zgRight.className = 'gua-line-zg-right';
+      const nz = document.createElement('span');
+      nz.className = 'znazhi';
+      nz.textContent = zgy.nazhi;
+      zgRight.appendChild(nz);
+      const wx = document.createElement('span');
+      wx.className = 'zwuxing';
+      wx.textContent = zgy.wuxing;
+      zgRight.appendChild(wx);
+      main.appendChild(zgRight);
+    }
 
     // Right: yao name + shi/ying
     const right = document.createElement('div');
@@ -335,68 +391,6 @@ function renderGuaCard(prefix, gua, changingYaos, isBian, zhuanggua) {
 
     container.appendChild(row);
   }
-
-  // 装卦表（六神/伏神/六亲/干支/五行/世应）
-  renderZhuangGuaTable(prefix, zhuanggua, isBian, changingYaos);
-}
-
-// ===== 装卦表 =====
-function renderZhuangGuaTable(prefix, zhuanggua, isBian, changingYaos) {
-  const wrap = document.getElementById(prefix + '-zhuanggua');
-  if (!wrap) return;
-  if (!zhuanggua || !zhuanggua.yaoList || zhuanggua.yaoList.length !== 6) { wrap.innerHTML = ''; return; }
-  const ZG = window.ZhuangGua;
-  const colorOf = ZG && ZG.getLiuqinColor ? ZG.getLiuqinColor : function(){ return '#999'; };
-
-  const shi = zhuanggua.shiYao, ying = zhuanggua.yingYao;
-  const pn = {1:'初',2:'二',3:'三',4:'四',5:'五',6:'上'};
-
-  const fushenMap = {};
-  const hasFushen = !!(zhuanggua.fushen && zhuanggua.fushen.length > 0);
-  (zhuanggua.fushen || []).forEach(function(f){ fushenMap[f.position] = f; });
-
-  let h = '<div class="zg-header">';
-  if (zhuanggua.liuqinPalace && zhuanggua.liuqinPalace !== zhuanggua.palace) {
-    h += '<b>' + zhuanggua.palace + '</b><span>六亲随' + zhuanggua.liuqinPalace + '·' + zhuanggua.gongWuxing + '</span>';
-  } else {
-    h += '<b>' + zhuanggua.palace + '·' + zhuanggua.gongWuxing + '</b>';
-  }
-  h += '<span>世 ' + pn[shi] + '爻</span>';
-  h += '<span>应 ' + pn[ying] + '爻</span>';
-  h += '</div>';
-
-  h += '<table class="paipan-table"><thead><tr>';
-  h += '<th>六神</th>' + (hasFushen ? '<th>伏神</th>' : '') + '<th>六亲</th><th>干支</th><th>五行</th><th>世应</th>';
-  h += '</tr></thead><tbody>';
-
-  // 自上爻（第6爻）向下到初爻，与卦象图顺序一致
-  for (let pos = 6; pos >= 1; pos--) {
-    const y = zhuanggua.yaoList.find(function(x){ return x.position === pos; });
-    if (!y) continue;
-    const fs = fushenMap[pos];
-    const isChanging = !isBian && changingYaos.indexOf(pos) >= 0;
-    const isChanged = isBian && changingYaos.indexOf(pos) >= 0;
-    const isShi = pos === shi, isYing = pos === ying;
-
-    const cls = [
-      y.isYang ? 'yang-line' : 'yin-line',
-      isChanging ? 'changing' : '',
-      isChanged ? 'changed' : '',
-      isShi ? 'shi-row' : '',
-      isYing ? 'ying-row' : ''
-    ].filter(Boolean).join(' ');
-
-    h += '<tr class="' + cls + '">';
-    h += '<td class="liushen-' + y.liushou + '">' + y.liushou + '</td>';
-    if (hasFushen) h += '<td class="fushen-inline">' + (fs ? (fs.fushenLiuqin + ' ' + fs.fushenNazhi) : '') + '</td>';
-    h += '<td class="col-liuqin" style="color:' + colorOf(y.liuqin) + '">' + y.liuqin + '</td>';
-    h += '<td>' + y.nazhi + '</td>';
-    h += '<td>' + y.wuxing + '</td>';
-    h += '<td>' + (isShi ? '<span class="shi-tag">世</span>' : (isYing ? '<span class="ying-tag">应</span>' : '')) + '</td>';
-    h += '</tr>';
-  }
-  h += '</tbody></table>';
-  wrap.innerHTML = h;
 }
 
 // ===== Render Reference Box — 朱熹考变占法 =====

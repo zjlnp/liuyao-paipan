@@ -12,7 +12,7 @@
 <link rel="apple-touch-icon" sizes="180x180" href="icons/icon-180.png">
 <link rel="apple-touch-icon" sizes="192x192" href="icons/icon-192.png">
 <link rel="icon" type="image/svg+xml" href="icons/icon.svg">
-<title>六爻排盘 v4.0</title>
+<title>六爻排盘 v4.1</title>
 <style>
 /* ===== 金钱卦 PWA v2.0 — 移动端适配 ===== */
 :root {
@@ -39,6 +39,7 @@ body {
 
 /* 后天八卦图（左侧中部） */
 .bagua-circle {
+  display: none; /* 默认隐藏：八卦基础知识浮动框 */
   position: fixed; top: 50%; left: 28px; transform: translateY(-50%); z-index: 55;
   width: 230px; height: 230px; user-select: none;
   border: 2px solid rgba(0,0,0,0.05); border-radius: 50%;

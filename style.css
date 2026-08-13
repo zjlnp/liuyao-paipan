@@ -23,6 +23,7 @@ body {
 
 /* 后天八卦图（左侧中部） */
 .bagua-circle {
+  display: none; /* 默认隐藏：八卦基础知识浮动框 */
   position: fixed; top: 50%; left: 28px; transform: translateY(-50%); z-index: 55;
   width: 230px; height: 230px; user-select: none;
   border: 2px solid rgba(0,0,0,0.05); border-radius: 50%;

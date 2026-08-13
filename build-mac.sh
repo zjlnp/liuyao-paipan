@@ -11,7 +11,7 @@ cd "$(dirname "$0")"
 APP_NAME="六爻排盘"
 BIN_NAME="LiuYaoPaiPan"
 BUNDLE_ID="com.liuyao.paipan"
-VERSION="4.0.0"
+VERSION="4.1.0"
 BUILD_DIR="build/mac"
 APP_DIR="$BUILD_DIR/${APP_NAME}.app"
 
@@ -47,7 +47,7 @@ cat > "$APP_DIR/Contents/Info.plist" <<EOF
     <key>CFBundleShortVersionString</key>
     <string>${VERSION}</string>
     <key>CFBundleVersion</key>
-    <string>4</string>
+    <string>5</string>
     <key>LSMinimumSystemVersion</key>
     <string>11.0</string>
     <key>LSRequiresNativeExecution</key>
@@ -73,10 +73,14 @@ sips -z 32 32 "$ICONSET/icon_512x512.png" --out "$ICONSET/icon_16x16@2x.png" >/d
 sips -z 16 16 "$ICONSET/icon_512x512.png" --out "$ICONSET/icon_16x16.png" >/dev/null
 iconutil -c icns "$ICONSET" -o "$APP_DIR/Contents/Resources/app.icns"
 
-echo "==> 5/5 复制资源并生成 DMG"
+echo "==> 5/5 复制资源并生成 DMG（含 Applications 拖动安装）"
 cp app.html "$APP_DIR/Contents/Resources/app.html"
+DMG_STAGE="$BUILD_DIR/dmg-stage"
+rm -rf "$DMG_STAGE"; mkdir -p "$DMG_STAGE"
+cp -R "$APP_DIR" "$DMG_STAGE/"
+ln -s /Applications "$DMG_STAGE/Applications"
 rm -f "$BUILD_DIR/${APP_NAME}.dmg"
-hdiutil create -volname "${APP_NAME}" -srcfolder "$APP_DIR" -ov -format UDZO "$BUILD_DIR/${APP_NAME}.dmg" >/dev/null
+hdiutil create -volname "${APP_NAME}" -srcfolder "$DMG_STAGE" -ov -format UDZO "$BUILD_DIR/${APP_NAME}.dmg" >/dev/null
 cp "$BUILD_DIR/${APP_NAME}.dmg" ~/Desktop/
 
 echo ""

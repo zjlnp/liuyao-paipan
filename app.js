@@ -22,6 +22,7 @@ document.addEventListener('DOMContentLoaded', () => {
   document.getElementById('clear-btn').addEventListener('click', clearAll);
   document.getElementById('bagua-toggle').addEventListener('click', toggleBagua);
   document.getElementById('history-toggle').addEventListener('click', toggleHistory);
+  document.getElementById('history-back').addEventListener('click', () => toggleHistory(false));
   document.getElementById('history-close').addEventListener('click', () => toggleHistory(false));
   document.getElementById('history-clear-all').addEventListener('click', clearHistory);
   document.getElementById('clear-cache-btn').addEventListener('click', clearAppCache);

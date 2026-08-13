@@ -12,7 +12,7 @@
 <link rel="apple-touch-icon" sizes="180x180" href="icons/icon-180.png">
 <link rel="apple-touch-icon" sizes="192x192" href="icons/icon-192.png">
 <link rel="icon" type="image/svg+xml" href="icons/icon.svg">
-<title>六爻排盘 v4.6.2</title>
+<title>六爻排盘 v4.6.3</title>
 <style>
 /* ===== 金钱卦 PWA v2.0 — 移动端适配 ===== */
 :root {
@@ -519,12 +519,13 @@ body {
   position: fixed; top: 0; right: 0; width: 360px; height: 100vh; height: 100dvh;
   background: var(--card-bg); box-shadow: -4px 0 24px rgba(0,0,0,0.1);
   z-index: 100; display: flex; flex-direction: column;
-  padding: calc(16px + var(--safe-top)) 16px calc(16px + var(--safe-bottom));
-  overflow-y: auto;
+  padding: 16px; overflow-y: auto;
 }
-.history-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
-.history-header h2 { font-size: 18px; font-weight: 700; }
+.history-header { display: flex; align-items: center; gap: 10px; margin-bottom: 12px; }
+.history-header h2 { flex: 1; font-size: 18px; font-weight: 700; }
 .history-header-btns { display: flex; gap: 6px; align-items: center; }
+.history-back { flex-shrink: 0; padding: 6px 14px; font-size: 13px; font-weight: 700; font-family: var(--font-sans); border: none; background: var(--primary); color: #fff; border-radius: 8px; cursor: pointer; }
+.history-back:hover { background: var(--primary-light); }
 .history-clear-top { padding: 4px 10px; font-size: 12px; font-weight: 600; font-family: var(--font-sans); border: 1px solid var(--border); background: transparent; border-radius: 6px; cursor: pointer; color: var(--primary); }
 .history-clear-top:hover { background: #f4eefb; border-color: var(--primary); }
 .history-close { width: 28px; height: 28px; font-size: 14px; font-weight: 600; border: 1px solid var(--border); background: transparent; border-radius: 6px; cursor: pointer; color: var(--text-muted); }
@@ -758,9 +759,8 @@ body {
   #app.has-results .zhi-gua-row { margin-bottom: 0; }
 
   /* History full screen */
-  .history-panel { width: 100vw; width: 100dvw; padding: calc(12px + var(--safe-top)) 12px calc(12px + var(--safe-bottom)); }
+  .history-panel { width: 100vw; width: 100dvw; padding: 12px; }
   .history-header h2 { font-size: 16px; }
-  .history-close { width: 40px; height: 40px; font-size: 20px; border-radius: 10px; }
   .history-item { padding: 8px 10px; }
   .history-item .hi-title { font-size: 13px; }
   .hi-btn { font-size: 12px; padding: 4px 12px; }
@@ -1013,6 +1013,7 @@ body {
 <!-- History -->
 <div class="history-panel" id="history-panel" style="display:none">
   <div class="history-header">
+    <button id="history-back" class="history-back">← 返回</button>
     <h2>📋 占卜历史</h2>
     <div class="history-header-btns">
       <button id="clear-cache-btn" class="history-clear-top" style="color:var(--text-secondary);">🧹 缓存</button>
@@ -10776,6 +10777,7 @@ document.addEventListener('DOMContentLoaded', () => {
   document.getElementById('clear-btn').addEventListener('click', clearAll);
   document.getElementById('bagua-toggle').addEventListener('click', toggleBagua);
   document.getElementById('history-toggle').addEventListener('click', toggleHistory);
+  document.getElementById('history-back').addEventListener('click', () => toggleHistory(false));
   document.getElementById('history-close').addEventListener('click', () => toggleHistory(false));
   document.getElementById('history-clear-all').addEventListener('click', clearHistory);
   document.getElementById('clear-cache-btn').addEventListener('click', clearAppCache);

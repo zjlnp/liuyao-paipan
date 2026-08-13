@@ -1,6 +1,6 @@
 {
   "name": "liuyao-paipan",
-  "version": "4.6.0",
+  "version": "4.6.1",
   "description": "六爻排盘 — 京房八宫纳甲装卦法，参照增删卜易",
   "main": "main.js",
   "scripts": {

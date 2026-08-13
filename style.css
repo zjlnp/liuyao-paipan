@@ -350,9 +350,9 @@ body {
 /* ===== Gua Visual ===== */
 .gua-visual { display: flex; flex-direction: column; align-items: center; gap: 7px; width: 100%; padding: 6px 0; }
 
-.gua-line-row { width: 100%; }
-.gua-line-row.changing { border-left: 3px dashed var(--gold); }
-.gua-line-row.changed { border-left: 3px dotted #c4956b; }
+.gua-line-row { width: 100%; position: relative; }
+.gua-line-row.changing::before { content: ''; position: absolute; left: 0; top: 0; bottom: 0; border-left: 3px dashed var(--gold); pointer-events: none; }
+.gua-line-row.changed::before { content: ''; position: absolute; left: 0; top: 0; bottom: 0; border-left: 3px dotted #c4956b; pointer-events: none; }
 .gua-line-main {
   display: flex; align-items: center; gap: 0;
   padding: 7px 0; cursor: pointer; border-radius: 4px; transition: background 0.15s;

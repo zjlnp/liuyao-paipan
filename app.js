@@ -1,8 +1,5 @@
 // ===== 第二代金钱卦 v1.8 =====
 
-const YAO_VAL_LABEL = { 6:'六（老阴→阳）', 7:'七（少阳）', 8:'八（少阴）', 9:'九（老阳→阴）' };
-const COMMENTATOR = { wangbi:'王弼·孔颖达', zhuxi:'朱熹', chengyi:'程颐', shaoyong:'邵雍', duanyitianji:'断易天机' };
-
 let currentResult = null;
 let historyData = [];
 let divinating = false;
@@ -42,16 +39,16 @@ function clearAll() {
 function setupInputs() {
   const inputs = [];
   for (let i=1;i<=6;i++) inputs.push(document.getElementById('yao'+i));
-  let processingKey = false;
   inputs.forEach((inp, idx) => {
+    let processing = false;
     inp.addEventListener('keydown', e => {
-      if (processingKey) return;
+      if (processing) return;
       if (['Backspace','Delete','Tab','ArrowLeft','ArrowRight','Escape'].includes(e.key)) return;
       if (/^[6-9]$/.test(e.key)) {
         e.preventDefault(); e.stopImmediatePropagation();
         inp.value = e.key; inp.classList.add('filled'); inp.classList.remove('invalid');
-        processingKey = true;
-        setTimeout(() => { processingKey = false; }, 200);
+        processing = true;
+        setTimeout(() => { processing = false; }, 200);
         if (idx<5) { inputs[idx+1].focus(); inputs[idx+1].select(); }
         return;
       }
@@ -59,7 +56,7 @@ function setupInputs() {
       setTimeout(() => inp.classList.remove('invalid'), 300);
     });
     inp.addEventListener('beforeinput', e => {
-      if (processingKey) { e.preventDefault(); e.stopImmediatePropagation(); }
+      if (processing) { e.preventDefault(); e.stopImmediatePropagation(); }
     });
     inp.addEventListener('paste', e => {
       e.preventDefault();
@@ -109,15 +106,13 @@ function insertPaipanInfo(r) {
   var gz = currentGzData;
   if (!gz || !r.ben_gua) return;
   var ZG = window.ZhuangGua;
-  if (!ZG || !ZG.getGuaShen) return;
+  if (!ZG || !ZG.getShenSha) return;
   var zg = r.ben_zhuanggua;
   if (!zg || !zg.yaoList) return;
 
-  var shiYao = zg.yaoList.find(function(y) { return y.isShi; });
-  var shiDizhi = shiYao ? shiYao.dizhi : '?';
-  var guaShenZhi = ZG.getGuaShen(shiDizhi);   // 卦身地支（世爻冲支）
-  var shiShenZhi = ZG.getShiShen(shiDizhi);    // 世身地支（=世爻地支）
-  var guaShenPos = ZG.getGuaShenPos(shiDizhi); // 卦身爻位
+  var guaShenZhi = zg.guaShenZhi || '?';   // 卦身地支（月卦身）
+  var shiShenZhi = zg.shiShenZhi || '?';    // 世身地支
+  var guaShenPos = zg.guaShenPos || 0;      // 卦身爻位（0=不入卦）
   var pn = {1:'初',2:'二',3:'三',4:'四',5:'五',6:'上'};
   var ss = ZG.getShenSha(gz.day.z, gz.day.g);
 
@@ -136,7 +131,7 @@ function insertPaipanInfo(r) {
   h += '<div class="pi-row">公历 '+ds+'（'+nl+'）</div>';
   if (jq) h += '<div class="pi-row">节气 '+jq+'</div>';
   h += '<div class="pi-row">干支 '+gzStr+(xk?'（旬空 '+xk+'）':'')+'</div>';
-  h += '<div class="pi-row">卦身 '+guaShenZhi+'（'+pn[guaShenPos]+'爻）&emsp;世身 '+shiShenZhi+'</div>';
+  h += '<div class="pi-row">' + (guaShenPos>0 ? '卦身 '+guaShenZhi+'（'+pn[guaShenPos]+'爻）' : '卦身 不入卦') + '&emsp;世身 '+shiShenZhi+'</div>';
   h += '<div class="pi-row">神煞 ';
   for (var i=0; i<ss.length; i++) {
     if (i>0) h += ' ';
@@ -357,16 +352,21 @@ function renderZhuangGuaTable(prefix, zhuanggua, isBian, changingYaos) {
   const pn = {1:'初',2:'二',3:'三',4:'四',5:'五',6:'上'};
 
   const fushenMap = {};
+  const hasFushen = !!(zhuanggua.fushen && zhuanggua.fushen.length > 0);
   (zhuanggua.fushen || []).forEach(function(f){ fushenMap[f.position] = f; });
 
   let h = '<div class="zg-header">';
-  h += '<b>' + zhuanggua.palace + '·' + zhuanggua.gongWuxing + '</b>';
+  if (zhuanggua.liuqinPalace && zhuanggua.liuqinPalace !== zhuanggua.palace) {
+    h += '<b>' + zhuanggua.palace + '</b><span>六亲随' + zhuanggua.liuqinPalace + '·' + zhuanggua.gongWuxing + '</span>';
+  } else {
+    h += '<b>' + zhuanggua.palace + '·' + zhuanggua.gongWuxing + '</b>';
+  }
   h += '<span>世 ' + pn[shi] + '爻</span>';
   h += '<span>应 ' + pn[ying] + '爻</span>';
   h += '</div>';
 
   h += '<table class="paipan-table"><thead><tr>';
-  h += '<th>六神</th><th>伏神</th><th>六亲</th><th>干支</th><th>五行</th><th>世应</th>';
+  h += '<th>六神</th>' + (hasFushen ? '<th>伏神</th>' : '') + '<th>六亲</th><th>干支</th><th>五行</th><th>世应</th>';
   h += '</tr></thead><tbody>';
 
   // 自上爻（第6爻）向下到初爻，与卦象图顺序一致
@@ -388,7 +388,7 @@ function renderZhuangGuaTable(prefix, zhuanggua, isBian, changingYaos) {
 
     h += '<tr class="' + cls + '">';
     h += '<td class="liushen-' + y.liushou + '">' + y.liushou + '</td>';
-    h += '<td class="fushen-inline">' + (fs ? (fs.fushenLiuqin + ' ' + fs.fushenNazhi) : '') + '</td>';
+    if (hasFushen) h += '<td class="fushen-inline">' + (fs ? (fs.fushenLiuqin + ' ' + fs.fushenNazhi) : '') + '</td>';
     h += '<td class="col-liuqin" style="color:' + colorOf(y.liuqin) + '">' + y.liuqin + '</td>';
     h += '<td>' + y.nazhi + '</td>';
     h += '<td>' + y.wuxing + '</td>';
@@ -449,7 +449,8 @@ function renderRefBox(r) {
       const l = r.ben_gua.lines_display.find(x => x.position === p);
       return l ? l.name : '?';
     }).join('、');
-    ruleHtml = `三爻变：<b>${yaos}</b><br>占本卦+变卦卦辞`;
+    const chuChanged3 = r.changing_yaos.includes(1);
+    ruleHtml = `三爻变：<b>${yaos}</b><br>占本卦+变卦卦辞（${chuChanged3 ? '前十卦主贞·本卦' : '后十卦主悔·变卦'}）`;
     textHtml = '【本卦】' + (r.ben_gua.guaci||'') + '\n【变卦】' + (r.bian_gua ? r.bian_gua.guaci||'' : '');
     baihuaHtml = r.ben_gua.guaci_baihua || '';
 
@@ -676,6 +677,23 @@ async function recalcAndRender() {
     changing_yaos: newChanges,
     num_changes: manualChanges.size
   };
+
+  // 重算装卦（本卦动爻标记已变，变卦可能换卦）
+  const gz = currentGzData || (typeof calcGanZhi === 'function' ? calcGanZhi(new Date()) : null);
+  if (window.ZhuangGua && gz && allHexagrams) {
+    updated.ben_zhuanggua = window.ZhuangGua.installZhuangGua(
+      { lines: currentResult.ben_gua.lines, lines_display: updated.ben_gua.lines_display, bagong: currentResult.ben_gua.bagong, upper: currentResult.ben_gua.upper, lower: currentResult.ben_gua.lower },
+      gz, allHexagrams
+    );
+    if (updated.bian_gua) {
+      updated.bian_zhuanggua = window.ZhuangGua.installZhuangGua(
+        { lines: updated.bian_gua.lines, lines_display: updated.bian_gua.lines_display, bagong: updated.bian_gua.bagong, upper: updated.bian_gua.upper, lower: updated.bian_gua.lower, parentPalace: currentResult.ben_gua.bagong.palace },
+        gz, allHexagrams
+      );
+    } else {
+      updated.bian_zhuanggua = null;
+    }
+  }
 
   // Update reference and rule
   const ruleDesc = manualChanges.size === 0 ? '静卦' :

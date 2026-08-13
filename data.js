@@ -39,7 +39,7 @@
     return yao + names[pos];
   }
 
-  function performDivination(lines, data) {
+  function performDivination(lines, data, gzData) {
     const benLines = lines.map(v => v === 7 || v === 9);
     const changingYaos = [];
     lines.forEach((v, i) => {
@@ -139,8 +139,8 @@
       reference_detail: referenceDetail,
       input_lines: lines
     };
-    if (window.ZhuangGua && typeof calcGanZhi === 'function') {
-      var gz = calcGanZhi(new Date());
+    if (window.ZhuangGua && (gzData || typeof calcGanZhi === 'function')) {
+      var gz = gzData || calcGanZhi(new Date());
       result.ben_zhuanggua = window.ZhuangGua.installZhuangGua(
         { lines: benLines, lines_display: result.ben_gua.lines_display, bagong: benHexagram.bagong, upper: benHexagram.upper, lower: benHexagram.lower },
         gz, data.hexagrams

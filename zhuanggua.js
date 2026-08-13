@@ -64,6 +64,9 @@ const DIZHI_WUXING = {
   '申':'金','酉':'金','戌':'土','亥':'水',
 };
 
+// 地支顺序（用于卦身/世身计算）
+const DIZHI_ORDER = '子丑寅卯辰巳午未申酉戌亥';
+
 // ===== 八卦五行 =====
 const BAGUA_WUXING = {
   '乾':'金','兑':'金',
@@ -202,6 +205,22 @@ function installZhuangGua(hexagram, gzData, hexagramData) {
     });
   }
 
+  // ===== 卦身（月卦身）与世身 =====
+  // 月卦身诀：阴世则从午月起，阳世还从子月生，欲得识其卦中意，从初数至世方真
+  // 世身歌诀：子午持世身居初，丑未持世身居二……巳亥持世身居六
+  const shiLine = yaoList.find(y => y.isShi);
+  let guaShenZhi = '?', guaShenPos = 0, shiShenZhi = '?', shiShenPos = 0;
+  if (shiLine) {
+    const start = shiLine.isYang ? 0 : 6;        // 阳世起子，阴世起午
+    guaShenZhi = DIZHI_ORDER[(start + shiYao - 1) % 12];
+    const guaShenYao = yaoList.find(y => y.dizhi === guaShenZhi);
+    guaShenPos = guaShenYao ? guaShenYao.position : 0;   // 0 = 身不入卦
+    const ssMap = {子:1,午:1,丑:2,未:2,寅:3,申:3,卯:4,酉:4,辰:5,戌:5,巳:6,亥:6};
+    shiShenPos = ssMap[shiLine.dizhi] || 0;
+    const shiShenYao = yaoList.find(y => y.position === shiShenPos);
+    shiShenZhi = shiShenYao ? shiShenYao.dizhi : '?';
+  }
+
   // 装六兽（基于日干）
   const dayGan = gzData ? gzData.day.g : '甲';
   const liushouStart = LIUSHOU_START[dayGan] !== undefined ? LIUSHOU_START[dayGan] : 0;
@@ -214,7 +233,7 @@ function installZhuangGua(hexagram, gzData, hexagramData) {
   const missingLiuqin = LIU_QIN.filter(lq => !liuqinSet.has(lq));
   const fushenList = [];
 
-  if (missingLiuqin.length > 0 && benGongLiuqin.length > 0) {
+  if (!hexagram.parentPalace && missingLiuqin.length > 0 && benGongLiuqin.length > 0) {
     for (let i = 0; i < 6; i++) {
       const benLq = benGongLiuqin[i];
       const curLq = yaoList[i].liuqin;
@@ -241,6 +260,7 @@ function installZhuangGua(hexagram, gzData, hexagramData) {
   return {
     palace: palace,
     gongWuxing: gongWuxing,
+    liuqinPalace: liuqinPalace,
     shiYao: shiYao,
     yingYao: yingYao,
     yaoList: yaoList,           // 6爻装卦结果
@@ -251,6 +271,10 @@ function installZhuangGua(hexagram, gzData, hexagramData) {
     riChen: riChen,             // 日辰
     yueJianWuxing: DIZHI_WUXING[yueJian],
     riChenWuxing: DIZHI_WUXING[riChen],
+    guaShenZhi: guaShenZhi,      // 卦身地支（月卦身）
+    guaShenPos: guaShenPos,      // 卦身爻位（0 = 身不入卦）
+    shiShenZhi: shiShenZhi,      // 世身地支
+    shiShenPos: shiShenPos,      // 世身爻位
     dayGan: gzData ? gzData.day.g : '甲',
     dayGanZhi: gzData ? (gzData.day.g + gzData.day.z) : '甲子',
   };
@@ -339,32 +363,6 @@ function riChenEffect(riZhi, yaoZhi) {
 }
 
 /**
- * 卦身地支：世爻地支的冲支（六冲配对）
- * 子午冲、丑未冲、寅申冲、卯酉冲、辰戌冲、巳亥冲
- * 例：世爻丑 → 卦身未
- */
-function getGuaShen(shiDizhi) {
-  var chongMap = {'子':'午','午':'子','丑':'未','未':'丑','寅':'申','申':'寅','卯':'酉','酉':'卯','辰':'戌','戌':'辰','巳':'亥','亥':'巳'};
-  return chongMap[shiDizhi] || '?';
-}
-
-/**
- * 世身地支：即世爻本身的地支
- * 例：世爻丑 → 世身丑
- */
-function getShiShen(shiDizhi) {
-  return shiDizhi;
-}
-
-/**
- * 卦身位置（子午持世身居初...）
- */
-function getGuaShenPos(shiDizhi) {
-  var map = {'子':1,'午':1,'丑':2,'未':2,'寅':3,'申':3,'卯':4,'酉':4,'辰':5,'戌':5,'巳':6,'亥':6};
-  return map[shiDizhi] || 0;
-}
-
-/**
  * 神煞（以日支起）
  */
 function getShenSha(riZhi, dayGan) {
@@ -388,9 +386,6 @@ window.ZhuangGua = {
   getLiuqinEmoji,
   yueJianEffect,
   riChenEffect,
-  getGuaShen,
-  getShiShen,
-  getGuaShenPos,
   getShenSha,
   DIZHI_WUXING,
   BAGUA_WUXING,

@@ -22,22 +22,56 @@ function hourGZ(dg,h){
 
 // 月干支：节气为界 + 五虎遁
 const JIE_QI_NAMES=['小寒','大寒','立春','雨水','惊蛰','春分','清明','谷雨','立夏','小满','芒种','夏至','小暑','大暑','立秋','处暑','白露','秋分','寒露','霜降','立冬','小雪','大雪','冬至'];
-const JIE_QI_OFFSETS=[5,20,35,50,65,80,95,110,125,140,155,170,185,200,215,230,245,260,275,290,305,320,335,350];
 // 节气索引→干支月: 0,1→12(丑月), 2,3→1(寅月), ...
 const JQ_TO_MONTH = [12,12,1,1,2,2,3,3,4,4,5,5,6,6,7,7,8,8,9,9,10,10,11,11];
 
-function getJieQi(dt){
-  const y=dt.getFullYear(), leap=(y%4===0&&y%100!==0)||(y%400===0);
-  const doy=Math.floor((dt-new Date(y,0,1))/86400000);
-  let r=null;
-  for(let i=0;i<24;i++){
-    let o=JIE_QI_OFFSETS[i]; if(i>=12&&leap)o+=1;
-    if(doy>=o) r={n:JIE_QI_NAMES[i],i};
+// 太阳视黄经（度）—— Meeus《天文算法》低精度太阳位置，含光行差与章动，精度约 ±0.01°
+function solarLongitude(jd) {
+  const T = (jd - 2451545.0) / 36525.0;
+  const L0 = 280.46646 + 36000.76983*T + 0.0003032*T*T;   // 太阳几何平黄经
+  const M  = 357.52911 + 35999.05029*T - 0.0001537*T*T;   // 太阳平近点角
+  const Mr = M * Math.PI / 180;
+  const C  = (1.914602 - 0.004817*T - 0.000014*T*T)*Math.sin(Mr)
+           + (0.019993 - 0.000101*T)*Math.sin(2*Mr)
+           + 0.000289*Math.sin(3*Mr);                      // 太阳中心方程
+  const omega = 125.04 - 1934.136*T;                       // 月球升交点黄经（章动项）
+  const lambda = L0 + C - 0.00569 - 0.00478*Math.sin(omega*Math.PI/180);
+  return ((lambda % 360) + 360) % 360;
+}
+
+// 第 n 个节气(0=小寒..23=冬至)在指定年的本地日期(0点)
+function sTermDate(year, n) {
+  // 立春(idx=2)用权威 LICHUN 表，确保与 yearGZ 年界严格一致
+  if (n === 2 && LICHUN && LICHUN[year]) {
+    return new Date(year, LICHUN[year][0]-1, LICHUN[year][1]);
   }
-  if(!r) r={n:'冬至',i:22};
-  let off=JIE_QI_OFFSETS[r.i]; if(r.i>=12&&leap)off+=1;
-  const match=Math.abs(doy-off)<=1;
-  return {name:r.n,index:r.i,isToday:match};
+  // 其余节气：二分法求太阳视黄经 = (285+15n)° 的时刻，取本地日期
+  let target = (285 + 15*n) % 360;
+  if (target < 270) target += 360;      // 映射到 [270,630) 单调区间
+  let lo = Date.UTC(year-1, 11, 1), hi = Date.UTC(year, 11, 31);
+  for (let i = 0; i < 50; i++) {
+    const mid = (lo + hi) / 2;
+    let sl = solarLongitude(mid/86400000 + 2440587.5);
+    if (sl < 270) sl += 360;
+    if (sl < target) lo = mid; else hi = mid;
+  }
+  const t = new Date(lo);
+  return new Date(t.getFullYear(), t.getMonth(), t.getDate());
+}
+
+function getJieQi(dt){
+  const y=dt.getFullYear();
+  const d=new Date(y,dt.getMonth(),dt.getDate()); // 本地当日0点
+  let idx=-1, termDate=null;
+  for(let n=23;n>=0;n--){
+    const t=sTermDate(y,n);
+    if(t<=d){ idx=n; termDate=t; break; }
+  }
+  if(idx<0){ // 早于当年小寒 → 去年冬至
+    idx=23; termDate=sTermDate(y-1,23);
+  }
+  const isToday = termDate.getTime()===d.getTime();
+  return {name:JIE_QI_NAMES[idx], index:idx, isToday};
 }
 
 function monthGZ(yg, jqIdx){
@@ -51,6 +85,7 @@ function parseChineseNumber(s) {
   if (!s || typeof s !== 'string') return NaN;
   var map = {'一':1,'二':2,'三':3,'四':4,'五':5,'六':6,'七':7,'八':8,'九':9,'十':10};
   if (map[s]) return map[s];
+  if (s === '二十' || s === '廿') return 20;
   if (s === '廿一'||s === '二十一') return 21; if (s === '廿二'||s === '二十二') return 22;
   if (s === '廿三'||s === '二十三') return 23; if (s === '廿四'||s === '二十四') return 24;
   if (s === '廿五'||s === '二十五') return 25; if (s === '廿六'||s === '二十六') return 26;
@@ -76,7 +111,7 @@ function getLunarFromIntl(dt){
     }
     if (isNaN(day)) day = dt.getDate(); // fallback to solar day
     // Parse Chinese month number: "正月"→1, "五月"→5, "十一月"→11, "十二月"→12
-    const chM = {'正月':1,'二月':2,'三月':3,'四月':4,'五月':5,'六月':6,'七月':7,'八月':8,'九月':9,'十月':10,'十一月':11,'十二月':12};
+    const chM = {'正月':1,'二月':2,'三月':3,'四月':4,'五月':5,'六月':6,'七月':7,'八月':8,'九月':9,'十月':10,'十一月':11,'十二月':12,'冬月':11,'腊月':12};
     let mNum = chM[month] || 0;
     return { lunarYear:year, month:mNum, day, isLeap };
   } catch(e) {

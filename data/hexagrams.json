@@ -2651,9 +2651,9 @@
         },
         {
           "position": 4,
-          "name": "九四",
-          "isYang": true,
-          "isDangWei": false
+          "name": "六四",
+          "isYang": false,
+          "isDangWei": true
         },
         {
           "position": 5,
@@ -2663,9 +2663,9 @@
         },
         {
           "position": 6,
-          "name": "上六",
-          "isYang": false,
-          "isDangWei": true
+          "name": "上九",
+          "isYang": true,
+          "isDangWei": false
         }
       ],
       "commentaries": {
@@ -2698,9 +2698,9 @@
         false,
         true,
         false,
-        false,
         true,
-        true
+        true,
+        false
       ],
       "lines": [
         false,
@@ -4307,9 +4307,9 @@
         },
         {
           "position": 6,
-          "name": "上九",
-          "isYang": true,
-          "isDangWei": false
+          "name": "上六",
+          "isYang": false,
+          "isDangWei": true
         }
       ],
       "commentaries": {
@@ -4344,7 +4344,7 @@
         true,
         false,
         false,
-        false
+        true
       ],
       "lines": [
         false,
@@ -4980,15 +4980,15 @@
         },
         {
           "position": 4,
-          "name": "九四",
-          "isYang": true,
-          "isDangWei": false
+          "name": "六四",
+          "isYang": false,
+          "isDangWei": true
         },
         {
           "position": 5,
-          "name": "六五",
-          "isYang": false,
-          "isDangWei": false
+          "name": "九五",
+          "isYang": true,
+          "isDangWei": true
         },
         {
           "position": 6,
@@ -5027,8 +5027,8 @@
         true,
         true,
         true,
-        false,
-        false,
+        true,
+        true,
         false
       ],
       "lines": [
@@ -5123,15 +5123,15 @@
         },
         {
           "position": 5,
-          "name": "九五",
-          "isYang": true,
-          "isDangWei": true
+          "name": "六五",
+          "isYang": false,
+          "isDangWei": false
         },
         {
           "position": 6,
-          "name": "上六",
-          "isYang": false,
-          "isDangWei": true
+          "name": "上九",
+          "isYang": true,
+          "isDangWei": false
         }
       ],
       "commentaries": {
@@ -5165,8 +5165,8 @@
         false,
         false,
         false,
-        true,
-        true
+        false,
+        false
       ],
       "lines": [
         true,
@@ -6070,15 +6070,15 @@
         },
         {
           "position": 3,
-          "name": "九三",
-          "isYang": true,
-          "isDangWei": true
+          "name": "六三",
+          "isYang": false,
+          "isDangWei": false
         },
         {
           "position": 4,
-          "name": "六四",
-          "isYang": false,
-          "isDangWei": true
+          "name": "九四",
+          "isYang": true,
+          "isDangWei": false
         },
         {
           "position": 5,
@@ -6088,9 +6088,9 @@
         },
         {
           "position": 6,
-          "name": "上九",
-          "isYang": true,
-          "isDangWei": false
+          "name": "上六",
+          "isYang": false,
+          "isDangWei": true
         }
       ],
       "commentaries": {
@@ -6123,10 +6123,10 @@
       "position_check": [
         false,
         true,
+        false,
+        false,
         true,
-        true,
-        true,
-        false
+        true
       ],
       "lines": [
         false,
@@ -7584,21 +7584,21 @@
         },
         {
           "position": 4,
-          "name": "六四",
-          "isYang": false,
-          "isDangWei": true
+          "name": "九四",
+          "isYang": true,
+          "isDangWei": false
         },
         {
           "position": 5,
-          "name": "九五",
-          "isYang": true,
-          "isDangWei": true
+          "name": "六五",
+          "isYang": false,
+          "isDangWei": false
         },
         {
           "position": 6,
-          "name": "上六",
-          "isYang": false,
-          "isDangWei": true
+          "name": "上九",
+          "isYang": true,
+          "isDangWei": false
         }
       ],
       "commentaries": {
@@ -7631,9 +7631,9 @@
         false,
         true,
         true,
-        true,
-        true,
-        true
+        false,
+        false,
+        false
       ],
       "lines": [
         false,
@@ -8132,15 +8132,15 @@
         },
         {
           "position": 4,
-          "name": "九四",
-          "isYang": true,
-          "isDangWei": false
+          "name": "六四",
+          "isYang": false,
+          "isDangWei": true
         },
         {
           "position": 5,
-          "name": "六五",
-          "isYang": false,
-          "isDangWei": false
+          "name": "九五",
+          "isYang": true,
+          "isDangWei": true
         },
         {
           "position": 6,
@@ -8179,8 +8179,8 @@
         true,
         false,
         false,
-        false,
-        false,
+        true,
+        true,
         true
       ],
       "lines": [

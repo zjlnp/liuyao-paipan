@@ -12,7 +12,7 @@
 <link rel="apple-touch-icon" sizes="180x180" href="icons/icon-180.png">
 <link rel="apple-touch-icon" sizes="192x192" href="icons/icon-192.png">
 <link rel="icon" type="image/svg+xml" href="icons/icon.svg">
-<title>六爻排盘 v4.1</title>
+<title>六爻排盘 v4.2</title>
 <style>
 /* ===== 金钱卦 PWA v2.0 — 移动端适配 ===== */
 :root {
@@ -1039,6 +1039,9 @@ const DIZHI_WUXING = {
   '申':'金','酉':'金','戌':'土','亥':'水',
 };
 
+// 地支顺序（用于卦身/世身计算）
+const DIZHI_ORDER = '子丑寅卯辰巳午未申酉戌亥';
+
 // ===== 八卦五行 =====
 const BAGUA_WUXING = {
   '乾':'金','兑':'金',
@@ -1177,6 +1180,22 @@ function installZhuangGua(hexagram, gzData, hexagramData) {
     });
   }
 
+  // ===== 卦身（月卦身）与世身 =====
+  // 月卦身诀：阴世则从午月起，阳世还从子月生，欲得识其卦中意，从初数至世方真
+  // 世身歌诀：子午持世身居初，丑未持世身居二……巳亥持世身居六
+  const shiLine = yaoList.find(y => y.isShi);
+  let guaShenZhi = '?', guaShenPos = 0, shiShenZhi = '?', shiShenPos = 0;
+  if (shiLine) {
+    const start = shiLine.isYang ? 0 : 6;        // 阳世起子，阴世起午
+    guaShenZhi = DIZHI_ORDER[(start + shiYao - 1) % 12];
+    const guaShenYao = yaoList.find(y => y.dizhi === guaShenZhi);
+    guaShenPos = guaShenYao ? guaShenYao.position : 0;   // 0 = 身不入卦
+    const ssMap = {子:1,午:1,丑:2,未:2,寅:3,申:3,卯:4,酉:4,辰:5,戌:5,巳:6,亥:6};
+    shiShenPos = ssMap[shiLine.dizhi] || 0;
+    const shiShenYao = yaoList.find(y => y.position === shiShenPos);
+    shiShenZhi = shiShenYao ? shiShenYao.dizhi : '?';
+  }
+
   // 装六兽（基于日干）
   const dayGan = gzData ? gzData.day.g : '甲';
   const liushouStart = LIUSHOU_START[dayGan] !== undefined ? LIUSHOU_START[dayGan] : 0;
@@ -1189,7 +1208,7 @@ function installZhuangGua(hexagram, gzData, hexagramData) {
   const missingLiuqin = LIU_QIN.filter(lq => !liuqinSet.has(lq));
   const fushenList = [];
 
-  if (missingLiuqin.length > 0 && benGongLiuqin.length > 0) {
+  if (!hexagram.parentPalace && missingLiuqin.length > 0 && benGongLiuqin.length > 0) {
     for (let i = 0; i < 6; i++) {
       const benLq = benGongLiuqin[i];
       const curLq = yaoList[i].liuqin;
@@ -1216,6 +1235,7 @@ function installZhuangGua(hexagram, gzData, hexagramData) {
   return {
     palace: palace,
     gongWuxing: gongWuxing,
+    liuqinPalace: liuqinPalace,
     shiYao: shiYao,
     yingYao: yingYao,
     yaoList: yaoList,           // 6爻装卦结果
@@ -1226,6 +1246,10 @@ function installZhuangGua(hexagram, gzData, hexagramData) {
     riChen: riChen,             // 日辰
     yueJianWuxing: DIZHI_WUXING[yueJian],
     riChenWuxing: DIZHI_WUXING[riChen],
+    guaShenZhi: guaShenZhi,      // 卦身地支（月卦身）
+    guaShenPos: guaShenPos,      // 卦身爻位（0 = 身不入卦）
+    shiShenZhi: shiShenZhi,      // 世身地支
+    shiShenPos: shiShenPos,      // 世身爻位
     dayGan: gzData ? gzData.day.g : '甲',
     dayGanZhi: gzData ? (gzData.day.g + gzData.day.z) : '甲子',
   };
@@ -1314,32 +1338,6 @@ function riChenEffect(riZhi, yaoZhi) {
 }
 
 /**
- * 卦身地支：世爻地支的冲支（六冲配对）
- * 子午冲、丑未冲、寅申冲、卯酉冲、辰戌冲、巳亥冲
- * 例：世爻丑 → 卦身未
- */
-function getGuaShen(shiDizhi) {
-  var chongMap = {'子':'午','午':'子','丑':'未','未':'丑','寅':'申','申':'寅','卯':'酉','酉':'卯','辰':'戌','戌':'辰','巳':'亥','亥':'巳'};
-  return chongMap[shiDizhi] || '?';
-}
-
-/**
- * 世身地支：即世爻本身的地支
- * 例：世爻丑 → 世身丑
- */
-function getShiShen(shiDizhi) {
-  return shiDizhi;
-}
-
-/**
- * 卦身位置（子午持世身居初...）
- */
-function getGuaShenPos(shiDizhi) {
-  var map = {'子':1,'午':1,'丑':2,'未':2,'寅':3,'申':3,'卯':4,'酉':4,'辰':5,'戌':5,'巳':6,'亥':6};
-  return map[shiDizhi] || 0;
-}
-
-/**
  * 神煞（以日支起）
  */
 function getShenSha(riZhi, dayGan) {
@@ -1363,9 +1361,6 @@ window.ZhuangGua = {
   getLiuqinEmoji,
   yueJianEffect,
   riChenEffect,
-  getGuaShen,
-  getShiShen,
-  getGuaShenPos,
   getShenSha,
   DIZHI_WUXING,
   BAGUA_WUXING,
@@ -1397,22 +1392,56 @@ function hourGZ(dg,h){
 
 // 月干支：节气为界 + 五虎遁
 const JIE_QI_NAMES=['小寒','大寒','立春','雨水','惊蛰','春分','清明','谷雨','立夏','小满','芒种','夏至','小暑','大暑','立秋','处暑','白露','秋分','寒露','霜降','立冬','小雪','大雪','冬至'];
-const JIE_QI_OFFSETS=[5,20,35,50,65,80,95,110,125,140,155,170,185,200,215,230,245,260,275,290,305,320,335,350];
 // 节气索引→干支月: 0,1→12(丑月), 2,3→1(寅月), ...
 const JQ_TO_MONTH = [12,12,1,1,2,2,3,3,4,4,5,5,6,6,7,7,8,8,9,9,10,10,11,11];
 
-function getJieQi(dt){
-  const y=dt.getFullYear(), leap=(y%4===0&&y%100!==0)||(y%400===0);
-  const doy=Math.floor((dt-new Date(y,0,1))/86400000);
-  let r=null;
-  for(let i=0;i<24;i++){
-    let o=JIE_QI_OFFSETS[i]; if(i>=12&&leap)o+=1;
-    if(doy>=o) r={n:JIE_QI_NAMES[i],i};
+// 太阳视黄经（度）—— Meeus《天文算法》低精度太阳位置，含光行差与章动，精度约 ±0.01°
+function solarLongitude(jd) {
+  const T = (jd - 2451545.0) / 36525.0;
+  const L0 = 280.46646 + 36000.76983*T + 0.0003032*T*T;   // 太阳几何平黄经
+  const M  = 357.52911 + 35999.05029*T - 0.0001537*T*T;   // 太阳平近点角
+  const Mr = M * Math.PI / 180;
+  const C  = (1.914602 - 0.004817*T - 0.000014*T*T)*Math.sin(Mr)
+           + (0.019993 - 0.000101*T)*Math.sin(2*Mr)
+           + 0.000289*Math.sin(3*Mr);                      // 太阳中心方程
+  const omega = 125.04 - 1934.136*T;                       // 月球升交点黄经（章动项）
+  const lambda = L0 + C - 0.00569 - 0.00478*Math.sin(omega*Math.PI/180);
+  return ((lambda % 360) + 360) % 360;
+}
+
+// 第 n 个节气(0=小寒..23=冬至)在指定年的本地日期(0点)
+function sTermDate(year, n) {
+  // 立春(idx=2)用权威 LICHUN 表，确保与 yearGZ 年界严格一致
+  if (n === 2 && LICHUN && LICHUN[year]) {
+    return new Date(year, LICHUN[year][0]-1, LICHUN[year][1]);
   }
-  if(!r) r={n:'冬至',i:22};
-  let off=JIE_QI_OFFSETS[r.i]; if(r.i>=12&&leap)off+=1;
-  const match=Math.abs(doy-off)<=1;
-  return {name:r.n,index:r.i,isToday:match};
+  // 其余节气：二分法求太阳视黄经 = (285+15n)° 的时刻，取本地日期
+  let target = (285 + 15*n) % 360;
+  if (target < 270) target += 360;      // 映射到 [270,630) 单调区间
+  let lo = Date.UTC(year-1, 11, 1), hi = Date.UTC(year, 11, 31);
+  for (let i = 0; i < 50; i++) {
+    const mid = (lo + hi) / 2;
+    let sl = solarLongitude(mid/86400000 + 2440587.5);
+    if (sl < 270) sl += 360;
+    if (sl < target) lo = mid; else hi = mid;
+  }
+  const t = new Date(lo);
+  return new Date(t.getFullYear(), t.getMonth(), t.getDate());
+}
+
+function getJieQi(dt){
+  const y=dt.getFullYear();
+  const d=new Date(y,dt.getMonth(),dt.getDate()); // 本地当日0点
+  let idx=-1, termDate=null;
+  for(let n=23;n>=0;n--){
+    const t=sTermDate(y,n);
+    if(t<=d){ idx=n; termDate=t; break; }
+  }
+  if(idx<0){ // 早于当年小寒 → 去年冬至
+    idx=23; termDate=sTermDate(y-1,23);
+  }
+  const isToday = termDate.getTime()===d.getTime();
+  return {name:JIE_QI_NAMES[idx], index:idx, isToday};
 }
 
 function monthGZ(yg, jqIdx){
@@ -1426,6 +1455,7 @@ function parseChineseNumber(s) {
   if (!s || typeof s !== 'string') return NaN;
   var map = {'一':1,'二':2,'三':3,'四':4,'五':5,'六':6,'七':7,'八':8,'九':9,'十':10};
   if (map[s]) return map[s];
+  if (s === '二十' || s === '廿') return 20;
   if (s === '廿一'||s === '二十一') return 21; if (s === '廿二'||s === '二十二') return 22;
   if (s === '廿三'||s === '二十三') return 23; if (s === '廿四'||s === '二十四') return 24;
   if (s === '廿五'||s === '二十五') return 25; if (s === '廿六'||s === '二十六') return 26;
@@ -1451,7 +1481,7 @@ function getLunarFromIntl(dt){
     }
     if (isNaN(day)) day = dt.getDate(); // fallback to solar day
     // Parse Chinese month number: "正月"→1, "五月"→5, "十一月"→11, "十二月"→12
-    const chM = {'正月':1,'二月':2,'三月':3,'四月':4,'五月':5,'六月':6,'七月':7,'八月':8,'九月':9,'十月':10,'十一月':11,'十二月':12};
+    const chM = {'正月':1,'二月':2,'三月':3,'四月':4,'五月':5,'六月':6,'七月':7,'八月':8,'九月':9,'十月':10,'十一月':11,'十二月':12,'冬月':11,'腊月':12};
     let mNum = chM[month] || 0;
     return { lunarYear:year, month:mNum, day, isLeap };
   } catch(e) {
@@ -4159,9 +4189,9 @@ window.__LIUYAO_DATA__ = {
         },
         {
           "position": 4,
-          "name": "九四",
-          "isYang": true,
-          "isDangWei": false
+          "name": "六四",
+          "isYang": false,
+          "isDangWei": true
         },
         {
           "position": 5,
@@ -4171,9 +4201,9 @@ window.__LIUYAO_DATA__ = {
         },
         {
           "position": 6,
-          "name": "上六",
-          "isYang": false,
-          "isDangWei": true
+          "name": "上九",
+          "isYang": true,
+          "isDangWei": false
         }
       ],
       "commentaries": {
@@ -4206,9 +4236,9 @@ window.__LIUYAO_DATA__ = {
         false,
         true,
         false,
-        false,
         true,
-        true
+        true,
+        false
       ],
       "lines": [
         false,
@@ -5815,9 +5845,9 @@ window.__LIUYAO_DATA__ = {
         },
         {
           "position": 6,
-          "name": "上九",
-          "isYang": true,
-          "isDangWei": false
+          "name": "上六",
+          "isYang": false,
+          "isDangWei": true
         }
       ],
       "commentaries": {
@@ -5852,7 +5882,7 @@ window.__LIUYAO_DATA__ = {
         true,
         false,
         false,
-        false
+        true
       ],
       "lines": [
         false,
@@ -6488,15 +6518,15 @@ window.__LIUYAO_DATA__ = {
         },
         {
           "position": 4,
-          "name": "九四",
-          "isYang": true,
-          "isDangWei": false
+          "name": "六四",
+          "isYang": false,
+          "isDangWei": true
         },
         {
           "position": 5,
-          "name": "六五",
-          "isYang": false,
-          "isDangWei": false
+          "name": "九五",
+          "isYang": true,
+          "isDangWei": true
         },
         {
           "position": 6,
@@ -6535,8 +6565,8 @@ window.__LIUYAO_DATA__ = {
         true,
         true,
         true,
-        false,
-        false,
+        true,
+        true,
         false
       ],
       "lines": [
@@ -6631,15 +6661,15 @@ window.__LIUYAO_DATA__ = {
         },
         {
           "position": 5,
-          "name": "九五",
-          "isYang": true,
-          "isDangWei": true
+          "name": "六五",
+          "isYang": false,
+          "isDangWei": false
         },
         {
           "position": 6,
-          "name": "上六",
-          "isYang": false,
-          "isDangWei": true
+          "name": "上九",
+          "isYang": true,
+          "isDangWei": false
         }
       ],
       "commentaries": {
@@ -6673,8 +6703,8 @@ window.__LIUYAO_DATA__ = {
         false,
         false,
         false,
-        true,
-        true
+        false,
+        false
       ],
       "lines": [
         true,
@@ -7578,15 +7608,15 @@ window.__LIUYAO_DATA__ = {
         },
         {
           "position": 3,
-          "name": "九三",
-          "isYang": true,
-          "isDangWei": true
+          "name": "六三",
+          "isYang": false,
+          "isDangWei": false
         },
         {
           "position": 4,
-          "name": "六四",
-          "isYang": false,
-          "isDangWei": true
+          "name": "九四",
+          "isYang": true,
+          "isDangWei": false
         },
         {
           "position": 5,
@@ -7596,9 +7626,9 @@ window.__LIUYAO_DATA__ = {
         },
         {
           "position": 6,
-          "name": "上九",
-          "isYang": true,
-          "isDangWei": false
+          "name": "上六",
+          "isYang": false,
+          "isDangWei": true
         }
       ],
       "commentaries": {
@@ -7631,10 +7661,10 @@ window.__LIUYAO_DATA__ = {
       "position_check": [
         false,
         true,
+        false,
+        false,
         true,
-        true,
-        true,
-        false
+        true
       ],
       "lines": [
         false,
@@ -9092,21 +9122,21 @@ window.__LIUYAO_DATA__ = {
         },
         {
           "position": 4,
-          "name": "六四",
-          "isYang": false,
-          "isDangWei": true
+          "name": "九四",
+          "isYang": true,
+          "isDangWei": false
         },
         {
           "position": 5,
-          "name": "九五",
-          "isYang": true,
-          "isDangWei": true
+          "name": "六五",
+          "isYang": false,
+          "isDangWei": false
         },
         {
           "position": 6,
-          "name": "上六",
-          "isYang": false,
-          "isDangWei": true
+          "name": "上九",
+          "isYang": true,
+          "isDangWei": false
         }
       ],
       "commentaries": {
@@ -9139,9 +9169,9 @@ window.__LIUYAO_DATA__ = {
         false,
         true,
         true,
-        true,
-        true,
-        true
+        false,
+        false,
+        false
       ],
       "lines": [
         false,
@@ -9640,15 +9670,15 @@ window.__LIUYAO_DATA__ = {
         },
         {
           "position": 4,
-          "name": "九四",
-          "isYang": true,
-          "isDangWei": false
+          "name": "六四",
+          "isYang": false,
+          "isDangWei": true
         },
         {
           "position": 5,
-          "name": "六五",
-          "isYang": false,
-          "isDangWei": false
+          "name": "九五",
+          "isYang": true,
+          "isDangWei": true
         },
         {
           "position": 6,
@@ -9687,8 +9717,8 @@ window.__LIUYAO_DATA__ = {
         true,
         false,
         false,
-        false,
-        false,
+        true,
+        true,
         true
       ],
       "lines": [
@@ -10437,7 +10467,7 @@ window.__LIUYAO_DATA__ = {
     return yao + names[pos];
   }
 
-  function performDivination(lines, data) {
+  function performDivination(lines, data, gzData) {
     const benLines = lines.map(v => v === 7 || v === 9);
     const changingYaos = [];
     lines.forEach((v, i) => {
@@ -10537,8 +10567,8 @@ window.__LIUYAO_DATA__ = {
       reference_detail: referenceDetail,
       input_lines: lines
     };
-    if (window.ZhuangGua && typeof calcGanZhi === 'function') {
-      var gz = calcGanZhi(new Date());
+    if (window.ZhuangGua && (gzData || typeof calcGanZhi === 'function')) {
+      var gz = gzData || calcGanZhi(new Date());
       result.ben_zhuanggua = window.ZhuangGua.installZhuangGua(
         { lines: benLines, lines_display: result.ben_gua.lines_display, bagong: benHexagram.bagong, upper: benHexagram.upper, lower: benHexagram.lower },
         gz, data.hexagrams
@@ -10599,9 +10629,6 @@ window.__LIUYAO_DATA__ = {
 
 // ===== 第二代金钱卦 v1.8 =====
 
-const YAO_VAL_LABEL = { 6:'六（老阴→阳）', 7:'七（少阳）', 8:'八（少阴）', 9:'九（老阳→阴）' };
-const COMMENTATOR = { wangbi:'王弼·孔颖达', zhuxi:'朱熹', chengyi:'程颐', shaoyong:'邵雍', duanyitianji:'断易天机' };
-
 let currentResult = null;
 let historyData = [];
 let divinating = false;
@@ -10641,16 +10668,16 @@ function clearAll() {
 function setupInputs() {
   const inputs = [];
   for (let i=1;i<=6;i++) inputs.push(document.getElementById('yao'+i));
-  let processingKey = false;
   inputs.forEach((inp, idx) => {
+    let processing = false;
     inp.addEventListener('keydown', e => {
-      if (processingKey) return;
+      if (processing) return;
       if (['Backspace','Delete','Tab','ArrowLeft','ArrowRight','Escape'].includes(e.key)) return;
       if (/^[6-9]$/.test(e.key)) {
         e.preventDefault(); e.stopImmediatePropagation();
         inp.value = e.key; inp.classList.add('filled'); inp.classList.remove('invalid');
-        processingKey = true;
-        setTimeout(() => { processingKey = false; }, 200);
+        processing = true;
+        setTimeout(() => { processing = false; }, 200);
         if (idx<5) { inputs[idx+1].focus(); inputs[idx+1].select(); }
         return;
       }
@@ -10658,7 +10685,7 @@ function setupInputs() {
       setTimeout(() => inp.classList.remove('invalid'), 300);
     });
     inp.addEventListener('beforeinput', e => {
-      if (processingKey) { e.preventDefault(); e.stopImmediatePropagation(); }
+      if (processing) { e.preventDefault(); e.stopImmediatePropagation(); }
     });
     inp.addEventListener('paste', e => {
       e.preventDefault();
@@ -10708,15 +10735,13 @@ function insertPaipanInfo(r) {
   var gz = currentGzData;
   if (!gz || !r.ben_gua) return;
   var ZG = window.ZhuangGua;
-  if (!ZG || !ZG.getGuaShen) return;
+  if (!ZG || !ZG.getShenSha) return;
   var zg = r.ben_zhuanggua;
   if (!zg || !zg.yaoList) return;
 
-  var shiYao = zg.yaoList.find(function(y) { return y.isShi; });
-  var shiDizhi = shiYao ? shiYao.dizhi : '?';
-  var guaShenZhi = ZG.getGuaShen(shiDizhi);   // 卦身地支（世爻冲支）
-  var shiShenZhi = ZG.getShiShen(shiDizhi);    // 世身地支（=世爻地支）
-  var guaShenPos = ZG.getGuaShenPos(shiDizhi); // 卦身爻位
+  var guaShenZhi = zg.guaShenZhi || '?';   // 卦身地支（月卦身）
+  var shiShenZhi = zg.shiShenZhi || '?';    // 世身地支
+  var guaShenPos = zg.guaShenPos || 0;      // 卦身爻位（0=不入卦）
   var pn = {1:'初',2:'二',3:'三',4:'四',5:'五',6:'上'};
   var ss = ZG.getShenSha(gz.day.z, gz.day.g);
 
@@ -10735,7 +10760,7 @@ function insertPaipanInfo(r) {
   h += '<div class="pi-row">公历 '+ds+'（'+nl+'）</div>';
   if (jq) h += '<div class="pi-row">节气 '+jq+'</div>';
   h += '<div class="pi-row">干支 '+gzStr+(xk?'（旬空 '+xk+'）':'')+'</div>';
-  h += '<div class="pi-row">卦身 '+guaShenZhi+'（'+pn[guaShenPos]+'爻）&emsp;世身 '+shiShenZhi+'</div>';
+  h += '<div class="pi-row">' + (guaShenPos>0 ? '卦身 '+guaShenZhi+'（'+pn[guaShenPos]+'爻）' : '卦身 不入卦') + '&emsp;世身 '+shiShenZhi+'</div>';
   h += '<div class="pi-row">神煞 ';
   for (var i=0; i<ss.length; i++) {
     if (i>0) h += ' ';
@@ -10956,16 +10981,21 @@ function renderZhuangGuaTable(prefix, zhuanggua, isBian, changingYaos) {
   const pn = {1:'初',2:'二',3:'三',4:'四',5:'五',6:'上'};
 
   const fushenMap = {};
+  const hasFushen = !!(zhuanggua.fushen && zhuanggua.fushen.length > 0);
   (zhuanggua.fushen || []).forEach(function(f){ fushenMap[f.position] = f; });
 
   let h = '<div class="zg-header">';
-  h += '<b>' + zhuanggua.palace + '·' + zhuanggua.gongWuxing + '</b>';
+  if (zhuanggua.liuqinPalace && zhuanggua.liuqinPalace !== zhuanggua.palace) {
+    h += '<b>' + zhuanggua.palace + '</b><span>六亲随' + zhuanggua.liuqinPalace + '·' + zhuanggua.gongWuxing + '</span>';
+  } else {
+    h += '<b>' + zhuanggua.palace + '·' + zhuanggua.gongWuxing + '</b>';
+  }
   h += '<span>世 ' + pn[shi] + '爻</span>';
   h += '<span>应 ' + pn[ying] + '爻</span>';
   h += '</div>';
 
   h += '<table class="paipan-table"><thead><tr>';
-  h += '<th>六神</th><th>伏神</th><th>六亲</th><th>干支</th><th>五行</th><th>世应</th>';
+  h += '<th>六神</th>' + (hasFushen ? '<th>伏神</th>' : '') + '<th>六亲</th><th>干支</th><th>五行</th><th>世应</th>';
   h += '</tr></thead><tbody>';
 
   // 自上爻（第6爻）向下到初爻，与卦象图顺序一致
@@ -10987,7 +11017,7 @@ function renderZhuangGuaTable(prefix, zhuanggua, isBian, changingYaos) {
 
     h += '<tr class="' + cls + '">';
     h += '<td class="liushen-' + y.liushou + '">' + y.liushou + '</td>';
-    h += '<td class="fushen-inline">' + (fs ? (fs.fushenLiuqin + ' ' + fs.fushenNazhi) : '') + '</td>';
+    if (hasFushen) h += '<td class="fushen-inline">' + (fs ? (fs.fushenLiuqin + ' ' + fs.fushenNazhi) : '') + '</td>';
     h += '<td class="col-liuqin" style="color:' + colorOf(y.liuqin) + '">' + y.liuqin + '</td>';
     h += '<td>' + y.nazhi + '</td>';
     h += '<td>' + y.wuxing + '</td>';
@@ -11048,7 +11078,8 @@ function renderRefBox(r) {
       const l = r.ben_gua.lines_display.find(x => x.position === p);
       return l ? l.name : '?';
     }).join('、');
-    ruleHtml = `三爻变：<b>${yaos}</b><br>占本卦+变卦卦辞`;
+    const chuChanged3 = r.changing_yaos.includes(1);
+    ruleHtml = `三爻变：<b>${yaos}</b><br>占本卦+变卦卦辞（${chuChanged3 ? '前十卦主贞·本卦' : '后十卦主悔·变卦'}）`;
     textHtml = '【本卦】' + (r.ben_gua.guaci||'') + '\n【变卦】' + (r.bian_gua ? r.bian_gua.guaci||'' : '');
     baihuaHtml = r.ben_gua.guaci_baihua || '';
 
@@ -11275,6 +11306,23 @@ async function recalcAndRender() {
     changing_yaos: newChanges,
     num_changes: manualChanges.size
   };
+
+  // 重算装卦（本卦动爻标记已变，变卦可能换卦）
+  const gz = currentGzData || (typeof calcGanZhi === 'function' ? calcGanZhi(new Date()) : null);
+  if (window.ZhuangGua && gz && allHexagrams) {
+    updated.ben_zhuanggua = window.ZhuangGua.installZhuangGua(
+      { lines: currentResult.ben_gua.lines, lines_display: updated.ben_gua.lines_display, bagong: currentResult.ben_gua.bagong, upper: currentResult.ben_gua.upper, lower: currentResult.ben_gua.lower },
+      gz, allHexagrams
+    );
+    if (updated.bian_gua) {
+      updated.bian_zhuanggua = window.ZhuangGua.installZhuangGua(
+        { lines: updated.bian_gua.lines, lines_display: updated.bian_gua.lines_display, bagong: updated.bian_gua.bagong, upper: updated.bian_gua.upper, lower: updated.bian_gua.lower, parentPalace: currentResult.ben_gua.bagong.palace },
+        gz, allHexagrams
+      );
+    } else {
+      updated.bian_zhuanggua = null;
+    }
+  }
 
   // Update reference and rule
   const ruleDesc = manualChanges.size === 0 ? '静卦' :

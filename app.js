@@ -906,7 +906,7 @@ function setupGanZhi() {
   actionsEl.insertBefore(pickBtn, actionsEl.firstChild);
 
   picker.addEventListener('change', () => {
-    if (picker.value) updateGanZhiDisplay(new Date(picker.value + 'T12:00:00'));
+    if (picker.value) updateGanZhiDisplay(new Date(picker.value + 'T12:00:00+08:00'));
   });
 
   // Initial display

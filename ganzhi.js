@@ -6,9 +6,26 @@ const DI_ZHI   = '子丑寅卯辰巳午未申酉戌亥';
 const SHENG_XIAO = '鼠牛虎兔龙蛇马羊猴鸡狗猪';
 const YUE_FEN  = ['正','二','三','四','五','六','七','八','九','十','冬','腊'];
 
-// 日干支：1900-01-01 = 甲戌日 (ord=10)
+// ===== 东八区（UTC+8）固定基准 =====
+// 历法计算一律按北京时间，脱离系统本地时区，保证换电脑/换时区结果一致
+const CST_MS = 8 * 3600 * 1000;
+
+// 该时刻的东八区(UTC+8)历法字段
+function cstFields(dt) {
+  const t = new Date(dt.getTime() + CST_MS);
+  return { y: t.getUTCFullYear(), m: t.getUTCMonth() + 1, d: t.getUTCDate(), h: t.getUTCHours(), mi: t.getUTCMinutes() };
+}
+
+// 子时(23:00)换日 —— 该时刻所属的干支日 {y,m,d}（23点后日干支归次日）
+function ganzhiDayFields(dt) {
+  const t = new Date(dt.getTime() + CST_MS + 3600 * 1000);
+  return { y: t.getUTCFullYear(), m: t.getUTCMonth() + 1, d: t.getUTCDate() };
+}
+
+// 日干支：1900-01-01 = 甲戌日 (ord=10)；按东八区 + 子时换日
 function dayGZ(dt){
-  const base=Date.UTC(1900,0,1), tgt=Date.UTC(dt.getFullYear(),dt.getMonth(),dt.getDate());
+  const g=ganzhiDayFields(dt);
+  const base=Date.UTC(1900,0,1), tgt=Date.UTC(g.y,g.m-1,g.d);
   let o=(10+Math.round((tgt-base)/86400000))%60; if(o<0)o+=60;
   return {g:TIAN_GAN[o%10],z:DI_ZHI[o%12],o};
 }
@@ -25,6 +42,12 @@ const JIE_QI_NAMES=['小寒','大寒','立春','雨水','惊蛰','春分','清�
 // 节气索引→干支月: 0,1→12(丑月), 2,3→1(寅月), ...
 const JQ_TO_MONTH = [12,12,1,1,2,2,3,3,4,4,5,5,6,6,7,7,8,8,9,9,10,10,11,11];
 
+// 节气近似日期(东八区月/日)，用于窄窗口二分定位
+const TERM_APPROX = [
+  [1,5],[1,20],[2,4],[2,19],[3,5],[3,20],[4,5],[4,20],[5,5],[5,21],[6,5],[6,21],
+  [7,7],[7,23],[8,7],[8,23],[9,7],[9,23],[10,8],[10,23],[11,7],[11,22],[12,7],[12,22]
+];
+
 // 太阳视黄经（度）—— Meeus《天文算法》低精度太阳位置，含光行差与章动，精度约 ±0.01°
 function solarLongitude(jd) {
   const T = (jd - 2451545.0) / 36525.0;
@@ -39,38 +62,42 @@ function solarLongitude(jd) {
   return ((lambda % 360) + 360) % 360;
 }
 
-// 第 n 个节气(0=小寒..23=冬至)在指定年的本地日期(0点)
+// 第 n 个节气(0=小寒..23=冬至)在东八区(UTC+8)所落日历日的 0 点对应 UTC 毫秒
 function sTermDate(year, n) {
   // 立春(idx=2)用权威 LICHUN 表，确保与 yearGZ 年界严格一致
   if (n === 2 && LICHUN && LICHUN[year]) {
-    return new Date(year, LICHUN[year][0]-1, LICHUN[year][1]);
+    return Date.UTC(year, LICHUN[year][0]-1, LICHUN[year][1]) - CST_MS;
   }
-  // 其余节气：二分法求太阳视黄经 = (285+15n)° 的时刻，取本地日期
-  let target = (285 + 15*n) % 360;
-  if (target < 270) target += 360;      // 映射到 [270,630) 单调区间
-  let lo = Date.UTC(year-1, 11, 1), hi = Date.UTC(year, 11, 31);
+  // 其余节气：在近似日期 ±25 天窄窗口内二分，求太阳视黄经 = (285+15n)° 的时刻
+  // 窗口内黄经变化 <50°（远小于 360°），以窗口左端黄经为参考，累计角度单调无跳变
+  const target = (285 + 15*n) % 360;
+  const center = Date.UTC(year, TERM_APPROX[n][0]-1, TERM_APPROX[n][1]);
+  let lo = center - 25*86400000, hi = center + 25*86400000;
+  const L0 = solarLongitude(lo/86400000 + 2440587.5);           // 窗口左端黄经
+  const need = ((target - L0) % 360 + 360) % 360;               // 从窗口左端到目标需走的角度
   for (let i = 0; i < 50; i++) {
     const mid = (lo + hi) / 2;
-    let sl = solarLongitude(mid/86400000 + 2440587.5);
-    if (sl < 270) sl += 360;
-    if (sl < target) lo = mid; else hi = mid;
+    const sl = solarLongitude(mid/86400000 + 2440587.5);
+    const diff = ((sl - L0) % 360 + 360) % 360;                 // 从窗口左端累计走过的角度
+    if (diff < need) lo = mid; else hi = mid;
   }
-  const t = new Date(lo);
-  return new Date(t.getFullYear(), t.getMonth(), t.getDate());
+  // lo 为节气精确时刻(UTC毫秒)，转东八区日历日
+  const u = new Date(lo + CST_MS);
+  return Date.UTC(u.getUTCFullYear(), u.getUTCMonth(), u.getUTCDate()) - CST_MS;
 }
 
 function getJieQi(dt){
-  const y=dt.getFullYear();
-  const d=new Date(y,dt.getMonth(),dt.getDate()); // 本地当日0点
-  let idx=-1, termDate=null;
+  const c=cstFields(dt);
+  const today=Date.UTC(c.y,c.m-1,c.d)-CST_MS; // 当前东八区日历日0点的UTC毫秒
+  let idx=-1, termMs=null;
   for(let n=23;n>=0;n--){
-    const t=sTermDate(y,n);
-    if(t<=d){ idx=n; termDate=t; break; }
+    const t=sTermDate(c.y,n);
+    if(t<=today){ idx=n; termMs=t; break; }
   }
   if(idx<0){ // 早于当年小寒 → 去年冬至
-    idx=23; termDate=sTermDate(y-1,23);
+    idx=23; termMs=sTermDate(c.y-1,23);
   }
-  const isToday = termDate.getTime()===d.getTime();
+  const isToday = (termMs===today);
   return {name:JIE_QI_NAMES[idx], index:idx, isToday};
 }
 
@@ -101,7 +128,7 @@ function parseChineseNumber(s) {
 function getLunarFromIntl(dt){
   try {
     const parts = new Intl.DateTimeFormat('zh-CN-u-ca-chinese', {
-      year:'numeric', month:'numeric', day:'numeric'
+      year:'numeric', month:'numeric', day:'numeric', timeZone:'Asia/Shanghai'
     }).formatToParts(dt);
     let year, month='', day, isLeap=false;
     for (const p of parts) {
@@ -143,12 +170,13 @@ function nongLiDayCN(d){
 
 // 主函数
 function calcGanZhi(dt){
-  const y=dt.getFullYear(), m=dt.getMonth()+1, d=dt.getDate(), h=dt.getHours();
-  const ygz=yearGZ(y,m,d);
+  const c=cstFields(dt);            // 东八区历法字段（公历显示用）
+  const gd=ganzhiDayFields(dt);     // 子时换日后的干支日
+  const ygz=yearGZ(gd.y,gd.m,gd.d);
   const dgz=dayGZ(dt);
   const jq=getJieQi(dt);
   const mgz=monthGZ(ygz.g, jq.index);
-  const hgz=hourGZ(dgz.g, h);
+  const hgz=hourGZ(dgz.g, c.h);     // 时辰按东八区小时
   const lu=getLunarFromIntl(dt);
   if(!lu) return {dateStr:'error'};
   return {
@@ -158,7 +186,7 @@ function calcGanZhi(dt){
     hour:{g:hgz.g,z:hgz.z,zn:hgz.zn},
     jieQi:jq,
     nongLi:{m:lu.month,d:lu.day,mn:YUE_FEN[lu.month-1],isLeap:lu.isLeap},
-    dateStr:y+'-'+String(m).padStart(2,'0')+'-'+String(d).padStart(2,'0')
+    dateStr:c.y+'-'+String(c.m).padStart(2,'0')+'-'+String(c.d).padStart(2,'0')
   };
 }
 
